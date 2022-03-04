@@ -1,0 +1,22 @@
+Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
+3,Light Sources,"Less (less of, lower)",Number,Few light sources (fewer light sources than expected),Too faint light (in parts of the scene),Sensor will receive too faint light from some scene regions
+86,Light Sources,Reverse,Spectrum,The light source emits no light in the expected spectrum,Insufficient light in scene,Underexposure
+124,Light Sources,No (not none),Intensity,L.s. is off,,Captured camera noise leads to fake effects
+141,Light Sources,"Less (less of, lower)",Beam properties,Focused beam,Only fractions of objects will be lit,Large parts of scene may be dark
+199,Medium,"Less (less of, lower)",Spectrum,Medium acts as a filter and changes the light's spectrum,Skewed colours,Failed detection - since training data was obtained under unfiltered light
+200,Medium,As well as,Spectrum,Medium has similar colour as nearby l.s./object,Low contrast,Objects and medium become indistinguishable
+204,Medium,"More (more of, higher)",Texture, Medium is more texturized than expected,"Object appearance can be significantly distorted, e.g. fragmented",Object recognition hampered
+211,Medium,Other than,Texture,Texture of medium is different than expected,Influences of medium on scene appearance is unexpected,Algorithms trained for a certain medium are confused
+296,Object,Close,Position,Object Closer to Observer than expected,,
+371,Object,"More (more of, higher)",Complexity,Object is more complex than expected,,"Parts of object not recognized or misinterpreted, "
+421,Object,No (not none),Spectrum,Object has no specific colour,"Object's colour fully depends on incoming light, i.e. it reflects all light as received",Object is not recognized at all (e.g. a white wall or a mirror)
+478,Object,"More (more of, higher)",Reflectance,Obj. has much Refl. (more than expected),Shiny surface - mirror,Object not recognized
+537,Objects,No (not none),Number,Number of objects is not detectable/decidable,"Scene with ""unknown"" number of objects",False negatives: CV alg. misses detection of some objects
+611,Objects,"Less (less of, lower)",Occlusion,Less objects occlude each other than expected,More details of objects are visible,Detection quality is decreased by too much clutter in the scene
+651,Objects,"More (more of, higher)",Shadowing,More shadowing than expected,Large parts of scene in shadow,Underexposure: objects in shadow not detected
+827,Observer - Optomechanics,Other than,Field of View,Orientation/Position is Other than expected,Tilt view,Objects not recognized
+869,Observer - Optomechanics,Temporal aperiodic,Viewing orientation,VOrient changes in a temporally aperiodic manner,Motion blur,Occasional misinterpretation of scene
+910,Observer - Optomechanics,"More (more of, higher)",Transparency,The sensor optics is more transparent than expected,Overall scene intensity as received by the electronics is higher than expected,"Overexposure, at least of specific objects"
+1017,Observer - Optomechanics,"Less (less of, lower)",Focusing,DoF is smaller than expected,Blurry image,Detection of edges and their correct position deteriorated
+1120,Observer - Electronics,"More (more of, higher)",Exposure and shutter,Longer exposure time than expected,More light captured per image than expected,Overexposure
+1159,Observer - Electronics,"Less (less of, lower)",Resolution (spatial),Pixel size is larger than expected,Pixel size is larger than expected,Lower noise level than expected

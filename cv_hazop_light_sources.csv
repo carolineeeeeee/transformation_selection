@@ -1,0 +1,127 @@
+Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
+0,Light Sources,No (not none),Number,No light sources,No light available,"Sensor will receive no light, but thermal noise or black current can  cause wrong input"
+1,Light Sources,"More (more of, higher)",Number,Many light sources (more light sources than expected),Too much light,Overexposure (of whole image)
+2,Light Sources,"More (more of, higher)",Number,Many light sources (more light sources than expected),Too few shadows,Algorithms using shadows can be confused
+3,Light Sources,"Less (less of, lower)",Number,Few light sources (fewer light sources than expected),Too faint light (in parts of the scene),Sensor will receive too faint light from some scene regions
+4,Light Sources,"Less (less of, lower)",Number,Few light sources (fewer light sources than expected),Too many shadows,Algorithms can be confused by shadows
+5,Light Sources,"Less (less of, lower)",Number,Few light sources (fewer light sources than expected),Very sharp shadows,
+6,Light Sources,As well as,Number,Mirrors fake additional light sources,Light sources can appear at locations other than where they are,Algorithm confuses position of light sources
+7,Light Sources,As well as,Number,Mirrors fake additional light sources,Increases shadow complexity,Algorithm detects more light sources than exist
+8,Light Sources,As well as,Number,Mirrors fake additional light sources,"Also as ""More""","Also as ""More"""
+9,Light Sources,Part of,Number,Part of expected light source configuration is missing,"Light source configuration appears different than ""usual""",Scene-relevant light-source or shadow configuration not detected
+10,Light Sources,Part of,Number,Part of expected light source configuration is missing,"Shadow configuration appears different than ""usual""",Scene-relevant light-source or shadow configuration confused with other configuration
+11,Light Sources,Where else,Number,Light sources are arranged differently than expected,Characteristic arrangements are corrupted,CV algorithm based on characteristic arrangements of lights fail
+12,Light Sources,Spatial periodic,Number,Several light sources are configured in periodic manner,Consequences depend on combined parameter,Hazards depend on combined parameter
+13,Light Sources,Spatial aperiodic,Number,"See ""spatial periodic"" [Several light sources are configured in aperiodic manner]","See ""spatial periodic"" [Consequences depend on combined parameter]","See ""spatial periodic"" [Hazards depend on combined parameter]"
+16,Light Sources,No (not none),Position,Position of light source not known,Light source is not in direct view or not detected as such,An algorithm cannot relate a shadow from the scene to the respective light source and might confuse it with an object
+17,Light Sources,No (not none),Position,"No finite position known, hence infinitely far away",Light rays are parallel,Rendering: this approximation can lead to shadows different from real ones
+18,Light Sources,No (not none),Position,"No finite position known, hence infinitely far away","No measurable dimming within ""terrestrial"" distances due to distance from Light source",
+19,Light Sources,"More (more of, higher)",Position,Light source far away from scene,Lighting of scene can be too weak,"See No [Sensor will receive no light, but thermal noise or black current can  cause wrong input]"
+20,Light Sources,"More (more of, higher)",Position,Light source far away from scene,Also: See No [No light available],also: See Less Num [Sensor will receive too faint light from some scene regions; Algorithms can be confused by shadows]
+21,Light Sources,"Less (less of, lower)",Position,Light source near to observer ,Lighting of scene can be too strong,Over- and underexposure in same scene possible
+22,Light Sources,"Less (less of, lower)",Position,Light source near to observer ,Light intensity may decrease (with increasing distance from Light source) significantly within scene,Only parts close to Light source sufficiently illuminated
+23,Light Sources,"Less (less of, lower)",Position,Light source near to observer ,Shadow direction may change significantly within scene ,Different shadow directions may confuse algorithm 
+24,Light Sources,"Less (less of, lower)",Position,Light source near to observer ,See More Num [Too much light; Too few shadows],
+25,Light Sources,As well as,Position,Light source can only be described with several positions,See Num [Light sources can appear at locations other than where they are; Increases shadow complexity],See Num[Algorithm confuses position of light sources; Algorithms can be confused by shadows]
+26,Light Sources,Part of,Position,Part of Light source is visible,Light source at the image's edge looks different than in the middle,Overexposure (of image parts)
+27,Light Sources,Part of,Position,Part of Light source is visible,Light source may look strange,Reflections of optics in image
+28,Light Sources,Part of,Position,Part of Light source is visible,,Blooming
+29,Light Sources,Part of,Position,Part of Light source is visible,,Light source may be confused with another Light source by CV algorithm
+30,Light Sources,Where else,Position,Light source has a different position than expected,Algorithms needing a Light source position are not applicable,The changed position will reduce the detection rate of an algorithm if it was trained using old scene data
+31,Light Sources,Where else,Position,Light source has a different position than expected,Shadows and object visibility are different than expected,
+32,Light Sources,Where else,Position,Light source has a different position than expected,See More & Less for Area (combination of both) [Complex illumination computation needed],
+33,Light Sources,Where else,Position,Light source position cannot be assigned precisely (with a certain position),See Where else position (1) [Algorithms needing a Light source position are not applicable],See Where else position (1) [The changed position will reduce the detection rate of an algorithm if it was trained using old scene data]
+43,Light Sources,In front of,Position,Two or more light sources in a row: The expected light source is in the back,Wrong side of objects are lit,See Less [Over- and underexposure in same scene possible;  Only parts close to Light source sufficiently illuminated; Different shadow directions may confuse algorithm]
+44,Light Sources,In front of,Position,Two or more light sources in a row: The expected light source is in the back,"Could be same as less, depending on strength of other light source",
+45,Light Sources,In front of,Position,Light source is part of scene (in front of observer),Light source can be directly visible from observer,Overexposure (of image parts) - local outshining
+46,Light Sources,In front of,Position,Light source is part of scene (in front of observer),,Reflections of optics in image
+47,Light Sources,In front of,Position,Light source is part of scene (in front of observer),,Virtual rays in image
+48,Light Sources,In front of,Position,Light source is part of scene (in front of observer),,blooming
+49,Light Sources,Behind,Position,Two or more light sources in a row: The expected light source is in front,Could be same as more depending on strength of other light source,"See more [Sensor will receive no light, but thermal noise or black current can  cause wrong input; Sensor will receive too faint light from some scene regions; Algorithms can be confused by shadows]"
+50,Light Sources,Behind,Position,Light source behind Observer,Objects illuminated with small angle between direction of light and direction of view,Small irregularities on object surfaces with same colours as surroundings may remain undetected
+51,Light Sources,Behind,Position,Light source behind Observer,Shadows hardly visible and short,Transparent objects may remain undetected
+52,Light Sources,Behind,Position,Light source behind Observer,Little contrasts on smooth surfaces,Reflecting areas oriented parallel to image plain may appear over exposed
+53,Light Sources,Behind,Position,Light source behind Observer,Observer can cast shadow onto the scene (has to be modelled if important for application),
+56,Light Sources,Faster,Position,Light source moves faster than expected,Doppler Shift,Motion blur
+59,Light Sources,No (not none),Area,Point-like Light source,No Light source extent (needed to be computed),Extremely sharp shadows
+60,Light Sources,"More (more of, higher)",Area,Large Light source,Complex illumination computation needed,Diffuse shadows
+61,Light Sources,"More (more of, higher)",Area,Large Light source,,Low contrasts
+62,Light Sources,"Less (less of, lower)",Area,Light source with small but not point-like extent,See No [No Light source extent (needed to be computed)],See No [Extremely sharp shadows]
+63,Light Sources,As well as,Area,Light source with both small and large extents,Mixture of illumination models needed,Overexposure
+64,Light Sources,As well as,Area,Light source with both small and large extents,,Anisotropic shadowing
+65,Light Sources,Part of,Area,Part of Light source (area) is visible (although Pos is outside),See Pos [Light source at the image's edge looks different than in the middle; Light source may look strange],See Pos [Overexposure (of image parts); Reflections of optics in image;  Blooming;  Virtual rays in image]
+66,Light Sources,Reverse,Area,Light source shadows the area (because it is an object too),Creates unexpected Texture,See Less and Other than Texture [Structured light  approach is not able to identify projected pattern ; CV algorithms relying on illumination texture may be severely confused]
+67,Light Sources,Reverse,Area,Light source shadows the area (because it is an object too),Too weak light on scene,
+68,Light Sources,Spatial periodic,Area,See Num [Several light sources are configured in periodic manner],See Num [Consequences depend on combined parameter],
+69,Light Sources,Spatial aperiodic,Area,"Instead of focusing the light in the wanted area, the light source spreads the light into different patches",This creates a texture ,See More texture
+73,Light Sources,Behind,Area,Light source behind observer,,Large area may remove contrasts to a high degree (completely)
+74,Light Sources,Behind,Area,Light source behind observer,,Small area may cause to cast observer large shadow onto scene
+75,Light Sources,No (not none),Spectrum,Monochromatic light source,To little texture as contrast is also created by different colours which are not visible under monochromatic light,No colours can be distinguished in scene
+76,Light Sources,No (not none),Spectrum,Monochromatic light source,Colours in scene reduced to one frequency (strong information reduction),"If observer not sensitive to emitted colour, under exposure will likely result"
+77,Light Sources,"More (more of, higher)",Spectrum,More continuous spectrum (Light source has a very broad spectrum),Little influence on scene colours by Light source,Underexposure
+78,Light Sources,"More (more of, higher)",Spectrum,More continuous spectrum (Light source has a very broad spectrum),Very broad spectrum means the Intensity itself will be low as much of the energy is wasted in regions the sensor cannot use,
+79,Light Sources,"Less (less of, lower)",Spectrum,Less continuous spectrum (Light source has a very sharp spectrum) ,"Only a few ""colours"" emitted by Light source",Scene may appear in unusual colours
+80,Light Sources,"Less (less of, lower)",Spectrum,Less continuous spectrum (Light source has a very sharp spectrum) ,"Like ""No"", if only one colour emitted","If observer is sensitive neither to emitted light nor to frequencies to which Light source light is transformed by some object/ process, underexposure may result"
+81,Light Sources,As well as,Spectrum,Light source has additional peak in spectrum where it's not expected,See Meaning [Light source has additional peak in spectrum where it's not expected],Ultra violet light in addition to visible light can cause unexpected effects in electronic sensor part of observer
+82,Light Sources,As well as,Spectrum,Light source has additional peak in spectrum where it's not expected,,"If additional peak is within the sensors response, this will create some unwanted overexposure"
+83,Light Sources,As well as,Spectrum,One Light source has no or less spectrum and another has more,Illumination characteristics depend on orientation and position of Light sources,Different kinds of illumination in different zones of scene can confuse observer
+84,Light Sources,Part of,Spectrum,The light source only emits a part of the expected spectrum,Skewed spectrum,Algorithm can miss detections as the environment is very different from the expected/ trained one
+85,Light Sources,Part of,Spectrum,The light source only emits a part of the expected spectrum,Objects appear in different colours than expected,
+86,Light Sources,Reverse,Spectrum,The light source emits no light in the expected spectrum,Insufficient light in scene,Underexposure
+87,Light Sources,Other than,Spectrum,A completely different spectrum is emitted,See Part of [Skewed spectrum; Objects appear in different colours than expected],CV algorithms relying on colour may be severely confused
+88,Light Sources,Other than,Spectrum,completely different Light source spectrum than usual in application,Illumination characteristics differ significantly from expected,
+89,Light Sources,Where else,Spectrum,MISSING,Note: objects reemitting incoming light in other wavelengths to be treated in Object HAZOP,
+90,Light Sources,Spatial periodic,Spectrum,The peaks within the light source spectrum are periodic,Special properties of resulting light,Interference
+91,Light Sources,Spatial periodic,Spectrum,The peaks within the light source spectrum are periodic,,
+92,Light Sources,Spatial aperiodic,Spectrum,See also Texture [""virtual"" textures in scene can fake stochastic textures],,
+95,Light Sources,Close,Spectrum,Peaks in the light source spectrum are too close to each other so that they become indistinguishable,Special colour contrasts in peak frequencies may be reduced,Special observers (filters) may be affected
+96,Light Sources,Remote,Spectrum,Peaks in the light source spectrum which are expected to be close to each other are too far way so that they become separated instead of giving a joined response ,Small textural light contrasts in scene may become exaggerated,Special observers (filters) may be affected
+101,Light Sources,No (not none),Texture,Light source has no texture,Homogeneous scene illumination with respect to Light source colour,Potential impact on dedicated CV algorithms (e.g. stereo on smooth objects with diffuse surface)
+102,Light Sources,"More (more of, higher)",Texture,Light source has too much texture,The light source produces a texture of its own by projecting a textured light beam (virtual texture),Texture of emitted light is confused with texture on object. This creates false positive detections.
+103,Light Sources,"More (more of, higher)",Texture,Light source has too much texture,,CV algorithm may be confused by virtual textures
+104,Light Sources,"Less (less of, lower)",Texture,The light source has not sufficient texture,Any structured light system dependent on texture fails,Structured light  approach is not able to identify projected pattern 
+105,Light Sources,As well as,Texture,"Light source projects combination of two textures, one expected, the other unexpected","Blending of lightings, complex illumination and shadowing",Texture of emitted light is interchanging with texture on object. This provokes missed detections.
+106,Light Sources,As well as,Texture,"Light source projects combination of two textures, one expected, the other unexpected",,"CV algorithms may be hampered by this illumination, in particular:"
+107,Light Sources,As well as,Texture,"Light source projects combination of two textures, one expected, the other unexpected",,Small changes in Light source configuration may cause large differences in responses of CV algorithm (e.g. Moiré)
+108,Light Sources,Part of,Texture,Only a part of a projected textured light pattern is captured,Missing texture information in the scene,A structured light system is not able to identify the projection of a pattern
+109,Light Sources,Other than,Texture,Light source emits completely different Light source texture than expected,Illumination characteristics (contrast) differ significantly from the expected,CV algorithms relying on illumination texture may be severely confused
+110,Light Sources,Where else,Texture,"Texture is as expected, but is projected into the wrong direction",See Beam [The illuminated area is displaced from the intended position],See Beam[]
+111,Light Sources,Spatial periodic,Texture,Periodic texture,Pattern reduces contrast on existing texture (interference more likely),"CV algorithms can take virtual textures for real, in particular on smooth, monochrome surfaces"
+112,Light Sources,Spatial periodic,Texture,Periodic texture,"""virtual"" textures in scene can fake periodic textures ",e.g. Moiré
+113,Light Sources,Spatial aperiodic,Texture,Aperiodic texture,"""virtual"" textures in scene can fake stochastic textures ","CV algorithms can take virtual textures for real, in particular on smooth, monochrome surfaces"
+116,Light Sources,Close,Texture,Light source emits a texture that is very similar to that of a different light source ,Distinction between Light source is hampered,Algorithm confuses this light source with another light source
+117,Light Sources,Remote,Texture,"Light source emits a texture that is very much different than the expected (and, e.g. trained one)",See Other than [Illumination characteristics (contrast) differ significantly from the expected],See Other than [CV algorithms relying on illumination texture may be severely confused]
+123,Light Sources,No (not none),Intensity,Light source is off,No light from this Light source in scene,Underexposure if no other light sources on
+124,Light Sources,No (not none),Intensity,Light source is off,,Captured camera noise leads to fake effects
+125,Light Sources,"More (more of, higher)",Intensity,Light source is too strong,Too much light in scene,Overexposure of lit objects
+126,Light Sources,As well as,Intensity,Strong and weak light sources mixed,Weak light sources are outshined by strong ones,"If light source should be detected by CV algorithm, this may be hampered"
+127,Light Sources,As well as,Intensity,Strong and weak light sources mixed,,Might exceed the intensity range of sensor
+128,Light Sources,Other than,Intensity,Intensity of light source is completely different than expected by application,Scene too bright or too dim,Over or underexposure of relevant objects or scene elements
+131,Light Sources,Close,Intensity,Two light sources have close intensity values,They are not distinguishable by their intensity,Algorithm is confused and misclassifies
+139,Light Sources,No (not none),Beam properties,Beam width is infinitely small,This Light source does not contribute to the scene illumination ,As Num if Num==1
+140,Light Sources,"More (more of, higher)",Beam properties,"Large beam angle, even omni-directional emission of light ",All objects will be lit,Reflections in all shiny surfaces possible
+141,Light Sources,"Less (less of, lower)",Beam properties,Focused beam,Only fractions of objects will be lit,Large parts of scene may be dark
+142,Light Sources,"Less (less of, lower)",Beam properties,Focused beam,,Unsmooth illumination of surfaces 
+143,Light Sources,"Less (less of, lower)",Beam properties,Focused beam,,Diffraction patterns possible
+144,Light Sources,As well as,Beam properties,Light source produces multiple beams,Complex illumination model needed,Strange scene illumination
+145,Light Sources,As well as,Beam properties,Light source produces multiple beams,,Confusing shadowing
+146,Light Sources,Reverse,Beam properties,Beam angle is broad where it should be thin and the other way around,See Less/ More [All objects will be lit; Only fractions of objects will be lit],See Less/ More[Reflections in all shiny surfaces possible; Large parts of scene may be dark; Unsmooth illumination of surfaces; Diffraction patterns possible]
+147,Light Sources,Reverse,Beam properties,Beam is pointing in the opposite direction than expected,See Less/ More [All objects will be lit; Only fractions of objects will be lit],See Less/ More[Reflections in all shiny surfaces possible; Large parts of scene may be dark; Unsmooth illumination of surfaces; Diffraction patterns possible]
+149,Light Sources,Other than,Beam properties,"No preferred light direction (""shining medium"")","Light comes from ""everywhere""",No shadows
+150,Light Sources,Other than,Beam properties,"No preferred light direction (""shining medium"")",,
+151,Light Sources,Where else,Beam properties,The beam points in the wrong direction,The illuminated area is displaced from the intended position,
+152,Light Sources,Spatial periodic,Beam properties,See Texture [Periodic texture],,
+153,Light Sources,Spatial aperiodic,Beam properties,See Texture [Aperiodic texture],,
+158,Light Sources,No (not none),Wave properties,Light is neither polarized nor coherent ,No interferences between light from different sources,Contrast increase with pol.filter will be diminished Þ Loss of contrast and thus misdetections
+159,Light Sources,No (not none),Wave properties,Light is neither polarized nor coherent ,Distinction between light from different sources by polarization is impossible,Observers relying on polarization or coherence will not work
+160,Light Sources,"More (more of, higher)",Wave properties,Light of some source is more polarized or coherent than expected,Interference effects like diffraction rings may appear in the scene,"Interference effects can disturb perception, e.g. may be confused with texture or objects, or obfuscate details"
+161,Light Sources,"More (more of, higher)",Wave properties,Light of some source is more polarized or coherent than expected,Extinction of light intensity when observed with polarization filters ,Underexposure (polarization may diminish light)
+162,Light Sources,"Less (less of, lower)",Wave properties,Light of some source is less polarized or coherent than expected,See No [No interferences between light from different sources; Distinction between light from different sources by polarization is impossible],See No [Contrast increase with pol.filter will be diminished Þ Loss of contrast and thus misdetections; Observers relying on polarization or coherence will not work]
+163,Light Sources,As well as,Wave properties,Light source is coherent as well as polarized,Effects as described under More will combine,Scene may look completely differently than expected
+164,Light Sources,As well as,Wave properties,The light of a coherent/ polarized Light source gets mixed with light having a different wave property,See No [No interferences between light from different sources; Distinction between light from different sources by polarization is impossible],See No [Contrast increase with pol.filter will be diminished Þ Loss of contrast and thus misdetections; Observers relying on polarization or coherence will not work]
+165,Light Sources,Reverse,Wave properties,Wave properties of emitted light are inverted relative to expectations.,Change polarization plane by 90° or if circular reverse rotation direction,Observed effects can become inverse to expected ones
+166,Light Sources,Other than,Wave properties,"Wave property is other than expected, ","Wave is linearly polarized instead of circular, or polarized instead of coherent",See Reverse
+167,Light Sources,Spatial periodic,Wave properties,Wave properties depend periodically from part of light source where light is emitted,Polarization plane depends periodically from location within light source area where it is emitted,"Visual effects depend on scene configuration, including observer location"
+168,Light Sources,Spatial periodic,Wave properties,Wave properties depend periodically from part of light source where light is emitted,,Object appearance can be periodically modified in a way the observer is not able to cope with
+169,Light Sources,Spatial periodic,Wave properties,Wave properties depend periodically from part of light source where light is emitted,,"Theoretically, these effects are predictable"
+170,Light Sources,Spatial aperiodic,Wave properties,Wave properties depend irregularly from part of light source where light is emitted, Polarization plane depends stochastically from location within light source area where it is emitted,"Same as Spatial periodic, but in an unpredictable way"

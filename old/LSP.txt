@@ -1,0 +1,34 @@
+https://spacy.io/models/en
+# describing changes
+too much/too few/little/weak
+different/more/less/smaller than/from/as expected
+increases/decreases N
+N rearranged/added/smoothed(V) N
+N changes
+# describing effects
+just a noun: overexposure/motion blur etc., or adj + noun: sharp shadows
+N in the scene
+
+###
+To evaluate, we take a random subset of CV-HAZOP and transformations, study missed ones and correctly matched ones.
+(what is the correct? This can be defined: A given lexico-syntactic pattern is considered to have matched correctly, if its results
+(hypernym/hyponym(s)) can be rephrased into a structure as the one presented in example (2). (2) NP1, NP2..., (and | or) NPn is a NP0 for all NPi, 1 ≤ i ≤ n, hyponym(NPi, NP0)
+How do we define the previous criteria? What is changed how something like this?
+criteria for good accuracy: 80% from https://aclanthology.org/R11-2017.pdf)
+After this LSP matching, the N's and V's should be pointing to a transformations. 
+same thing can be done with the transformations. (finding keywords for them like this)
+Then remove words that don't matter to image processing (dictionary mathcing)
+then we consider synonyms 
+
+# how to deal with requirements for combinations of transformations?
+# something simple to replace human threshold?
+
+# How do we connect it to the collaboration? This can be connected to CARLA scenario generation. 
+Shall we call it test generation in this case?
+# or should we dig the dataset evaluation angle? if there is no original images, what do we do? there is NR-IQA
+using one model may not make sense because of model limitation: how to know if it's because the model is not powerful enough rather than dataset is not good?
+
+# if we do ASE, we can completely ignore requirements and do test generation/dataset eval. The coverage would be coverage of parameter domains (with respect to a distribution, probability wise), IQA range
+
+
+the nltk pos tagger is unable to correctly tag sentences like 'increase shasow complexity', have to preprocess to 'This increases shadow complexity.'
