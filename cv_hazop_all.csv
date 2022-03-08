@@ -20,7 +20,7 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 18,Light Sources,No (not none),Position,"No finite position known, hence infinitely far away","No measurable dimming within ""terrestrial"" distances due to distance from light source",
 19,Light Sources,"More (more of, higher)",Position,L.s. far away from scene,Lighting of scene can be too weak,See No
 20,Light Sources,"More (more of, higher)",Position,L.s. far away from scene,Also: See No,also: See Less Num 
-21,Light Sources,"Less (less of, lower)",Position,L.s. near to observer ,Lighting of scene can be too strong,Over- and underexposure in same scene possible
+21,Light Sources,"Less (less of, lower)",Position,L.s. near to observer ,Lighting of scene can be too strong,Overexposure and underexposure in same scene possible
 22,Light Sources,"Less (less of, lower)",Position,L.s. near to observer ,Light intensity may decrease (with increasing distance from l.s.) significantly within scene,Only parts close to l.s. sufficiently illuminated
 23,Light Sources,"Less (less of, lower)",Position,L.s. near to observer ,Shadow direction may change significantly within scene ,Different shadow directions may confuse algorithm 
 24,Light Sources,"Less (less of, lower)",Position,L.s. near to observer ,See More Num ,
@@ -127,7 +127,7 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 125,Light Sources,"More (more of, higher)",Intensity,L.s. is too strong,Too much light in scene,Overexposure of lit objects
 126,Light Sources,As well as,Intensity,Strong and weak light sources mixed,Weak light sources are outshined by strong ones,"If light source should be detected by CV algorithm, this may be hampered"
 127,Light Sources,As well as,Intensity,Strong and weak light sources mixed,,Might exceed the intensity range of sensor
-128,Light Sources,Other than,Intensity,Intensity of light source is completely different than expected by appl.,Scene too bright or too dim,Over or underexposure of relevant objects or scene elements
+128,Light Sources,Other than,Intensity,Intensity of light source is completely different than expected by appl.,Scene too bright or too dim,Overexposure or underexposure of relevant objects or scene elements
 129,Light Sources,Temporal periodic,Intensity,The exposure time interval is not synchronized with the light source,Brightness of illuminated scene changes periodically over time,"Brightness of captured image depends on period phase and frequency, but between single images it may vary significantly"
 130,Light Sources,Temporal aperiodic,Intensity,L.s. intensity changes aperiodically over time,Brightness of illuminated scene changes aperiodically over time,"Brightness of individual images depends on speed of changes, but may vary highly unpredictable"
 131,Light Sources,Close,Intensity,Two light sources have close intensity values,They are not distinguishable by their intensity,Algorithm is confused and misclassifies
@@ -135,7 +135,7 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 133,Light Sources,After,Intensity,Light source is switched on after a picture was taken,See no,See No
 134,Light Sources,After,Intensity,Light source takes too much time to reach the expected intensity after being switched on,"Increases runtime if recognized by the algorithm, see Less otherwise",See Less
 135,Light Sources,After,Intensity,The aging light source delivers a different result as at its start,Change of texture over a longer time scope,Algorithm is confused by changing light source into thinking that the objects have changed
-136,Light Sources,Faster,Intensity,Intensity changes faster than expected.,Image brightness depends on exposure time and duration,Over- or under exposure
+136,Light Sources,Faster,Intensity,Intensity changes faster than expected.,Image brightness depends on exposure time and duration,Overexposure or underexposure
 137,Light Sources,Faster,Intensity,Intensity changes faster than expected.,,Observer electronics (exposure control) gets confused when trying to compensate
 138,Light Sources,Slower,Intensity,"Intensity changes Slowly over time, e.g. at sunset or sunrise",Scene brightness changes significantly over longer time intervals,CV alg. may miss resulting scene changes
 139,Light Sources,No (not none),Beam properties,Beam width is infinitely small,This l.s. does not contribute to the scene illumination ,As Num if Num==1
@@ -1053,16 +1053,16 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 1051,Observer - Optomechanics,Part of,Aperture,Aperture is only partially opened/closed,"Entrance and exit pupil degenerate to complex forms, as does the shape of a lens flare",Lens flare specific forms cannot be detected or compensated
 1052,Observer - Optomechanics,Part of,Aperture,Aperture is only partially opened/closed,Increase of optical aberrations (including chromatic aberration),
 1053,Observer - Optomechanics,Other than,Aperture,Aperture opening is different from expected,DOF different from expected,See More/Less
-1054,Observer - Optomechanics,Other than,Aperture,Aperture opening is different from expected,See More/Less,Over- or underexposure
+1054,Observer - Optomechanics,Other than,Aperture,Aperture opening is different from expected,See More/Less,Overexposure or underexposure
 1055,Observer - Optomechanics,Other than,Aperture,Aperture opening is different from expected,Wrong image brightness,
 1056,Observer - Optomechanics,Where else,Aperture,Aperture is placed at a different location in the lens assembly than expected ,Changed optical aberration amount,See Less Focus
 1057,Observer - Optomechanics,Where else,Aperture,Aperture is placed at a different location in the lens assembly than expected ,Different DOF than expected,
 1058,Observer - Optomechanics,Where else,Aperture,Aperture form is projected into different places within the image,Visible highlight artifacts blend/overexpose sections within the image,Objects not detected
 1059,Observer - Optomechanics,Where else,Aperture,Aperture form is projected into different places within the image,Chromatic aberration in shape of aperture (See More Colour),Aperture projection is mistaken for an object
 1060,Observer - Optomechanics,Where else,Aperture,Aperture form is projected into different places within the image,Contrast of objects or parts of objects are reduced,
-1061,Observer - Optomechanics,Temporal periodic,Aperture,Aperture changes periodically,Periodic change of image brightness,"Periodic change between over-, correct, and under-exposure "
+1061,Observer - Optomechanics,Temporal periodic,Aperture,Aperture changes periodically,Periodic change of image brightness,"Periodic change between overexposure, correct, and underexposure "
 1062,Observer - Optomechanics,Temporal periodic,Aperture,Aperture changes periodically,See Other than,See Other than
-1063,Observer - Optomechanics,Temporal aperiodic,Aperture,Aperture changes aperiodically,Aperiodic change of image brightness,"Aperiodic change between over-, correct, and under-exposure "
+1063,Observer - Optomechanics,Temporal aperiodic,Aperture,Aperture changes aperiodically,Aperiodic change of image brightness,"Aperiodic change between overexposure, correct, and underexposure "
 1064,Observer - Optomechanics,Temporal aperiodic,Aperture,Aperture changes aperiodically,See Other than,See Other than
 1065,Observer - Optomechanics,Close,Aperture,Apert is closer to observer electronics than expected,See Other than,See Other than
 1066,Observer - Optomechanics,Remote,Aperture,Apert is more remote from observer electronics than expected,See Other than,See Other than
@@ -1111,7 +1111,7 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 1109,Observer - Optomechanics,Temporal periodic,Optical Point Spread Function,The PSF fluctuates periodically over time,Image quality/blurriness fluctuates regularly over time,"""Performance is not stable, results fade in/out all the time"
 1110,Observer - Optomechanics,Temporal aperiodic,Optical Point Spread Function,The PSF is not as periodic as expected,The modelled PSF is changed periodically for de-convolution whereas the actual PSF is not => See Other Than,See Other Than
 1111,Observer - Optomechanics,Temporal aperiodic,Optical Point Spread Function,The PSF fluctuates chaotically over time,Blur compensation cannot keep up with chaotically changing blurriness,Image interpretation compromised due to irreversible blurriness
-1112,Observer - Optomechanics,Close,Optical Point Spread Function,The PSF is unexpected for close object distances,Image is more / less blurry than expected for objects with short distance,Over- and under-compensation of PSF during de-convolution
+1112,Observer - Optomechanics,Close,Optical Point Spread Function,The PSF is unexpected for close object distances,Image is more / less blurry than expected for objects with short distance,Over-compensation and under-compensation of PSF during de-convolution
 1113,Observer - Optomechanics,Close,Optical Point Spread Function,The PSF is unexpected for close object distances,,Inaccuracy in computation results
 1114,Observer - Optomechanics,Close,Optical Point Spread Function,The PSF is unexpected for close object distances,,Up to compromised interpretation due to irreversible blurriness
 1115,Observer - Optomechanics,Remote,Optical Point Spread Function,The PSF is different for objects that are far away,Image is more / less blurry than expected for objects with far distance ,See Close
@@ -1138,7 +1138,7 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 1136,Observer - Electronics,Spatial aperiodic,Exposure and shutter,Exposure time of photoelectric elements is not constant,Due to the mechanical opening of shutter the time of exposure is varying,LDR to HDR based on photometric calibration fails
 1137,Observer - Electronics,Spatial aperiodic,Exposure and shutter,Exposure time of photoelectric elements is not constant,Photometric calibration differs spatially,Optical flow is inaccurate 
 1138,Observer - Electronics,Spatial aperiodic,Exposure and shutter,Exposure time of photoelectric elements is not constant,The brightness constancy assumption flow is not entirely fulfilled,
-1139,Observer - Electronics,Temporal periodic,Exposure and shutter,Exposure time changes periodically,Frequent (and quick) changes between over- and underexposure,See other than
+1139,Observer - Electronics,Temporal periodic,Exposure and shutter,Exposure time changes periodically,Frequent (and quick) changes between overexposure and underexposure,See other than
 1140,Observer - Electronics,Temporal periodic,Exposure and shutter,Exposure time changes periodically,See other than,
 1141,Observer - Electronics,Temporal aperiodic,Exposure and shutter,Continuous recording without a constant exposure time,Movements of objects appear erratic,Miscalculation of positions
 1142,Observer - Electronics,Temporal aperiodic,Exposure and shutter,Continuous recording without a constant exposure time,,Miscalculation of motion 

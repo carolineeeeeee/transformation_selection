@@ -7,17 +7,45 @@ import textacy
 from nltk.stem import PorterStemmer
 porter = PorterStemmer()
 
-# need to find the maximum match
+
 def find_keywords(text, stemmed_keywords): 
     # stem everything, loop over keywords to find matches
     token_words=word_tokenize(text)
     stemmed = [porter.stem(word) for word in token_words]
-    clean_text = " ".join(stemmed)    
-    # TODO: find word match, not just letter match
-    found_keywords = [w for w in stemmed_keywords.keys() if any([(syn in clean_text) for syn in stemmed_keywords[w]])]#.split()]
-    # TODO: group them some how
-    # this will give a big list of words that may have duplicates
-    return found_keywords
+    clean_text = ' ' + " ".join(stemmed) + ' '    
+    found_keywords = [w for w in stemmed_keywords.keys() if any([(' ' + syn+' ' in clean_text) for syn in stemmed_keywords[w]])]#.split()]
+    # if light source exist, remove light and source
+    to_remove = []
+    for w in found_keywords:
+        if ' ' in w:
+            to_remove += w.split()
+        
+    return [w for w in found_keywords if w not in to_remove] 
+
+def group_keywords(entry_keywords_to_transf, stemmed_keywords):
+    grouped_match = {}
+    for entry in entry_keywords_to_transf:
+        if entry not in grouped_match:
+            grouped_match[entry] = {}
+        list_keywords = entry_keywords_to_transf[entry].keys()
+        #print(list_keywords)
+        groups = []
+        for k in list_keywords:
+            if k not in sum(groups, []):
+                similar = [j for j in list_keywords if porter.stem(j) in stemmed_keywords[k]]
+                groups.append(similar)
+        #print(groups)
+        
+        # TODO: remove words like image and scene (might be okay if we consider all entries and remove repeated keywords)
+        # temp fix: manually remove
+        for group in groups:
+            group_name = ', '.join(group)
+            if 'image' in group_name or 'scene' in group_name: #temp fix
+                continue 
+            group_match = list(set(sum([entry_keywords_to_transf[entry][k] for k in group], [])))
+            grouped_match[entry][group_name] = group_match
+    print(grouped_match)
+    return grouped_match
 
 def stem(text):
 	token_words=word_tokenize(text)
@@ -68,3 +96,4 @@ def check_parcing(text):
                 token.shape_, token.is_alpha, token.is_stop)
     for np in doc.noun_chunks:
         print(np.text)
+

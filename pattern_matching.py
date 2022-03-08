@@ -8,8 +8,6 @@ import re
 nlp = spacy.load("en_core_web_lg")
 
 def parse_text(text):
-    #onlt need adj, adv, v, n, np, aux
-
     #text = 'too bright light or window'
     doc = nlp(text)
     new_text = ''
@@ -43,55 +41,100 @@ def parse_text(text):
                
     # Calibration: NP of NP is an NP itself
     new_text = re.sub('\[\(NP\)([^\[\]]+)\]\s([^\[\]\(\)]+)\s\(ADP\)\s*\[\(NP\)([^\[\]]+)\]', '[(NP) \g<1> \g<2> (ADP) \g<3>]', new_text)
+    new_text = re.sub('([^\[\]\s]+\s\(NOUN\))\s([^\[\]\(\)]+)\s\(ADP\)\s*\[\(NP\)([^\[\]]+)\]', '[(NP) \g<1> \g<2> (ADP) \g<3>]', new_text)
+
     return new_text.strip()
-    #new_text = ''
-    #return text
+
+    # Calibration: include or inside NP?
+
+
 
 # increases, decreases, polarizes etc
-def vps(parsed_text):
+def vps(parsed_text): # TODO: separate: VERB NOUN+
     #NP VERB NP
-    match = re.findall(r'(\[\(NP\)[^\[\]]+\])?\s*(([^\[\]]+\s*\(ADV\))?\s*[^\[\]]+\s*\(VERB\).*)(\s*\[\(NP\)[^\[\]]+\])?', parsed_text)
-    results = []
-    for i in range(len(match)):
-        results.append(max(match[i], key=len))
-    # TODO: light is increased 
+    match = re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', '', parsed_text)
+    match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', '', parsed_text)
+    match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]]+\s*\(VERB\))', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]]+\s*\(VERB\))', '', parsed_text)
+    match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\))', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\))', '', parsed_text)
+    
+    #match += re.findall(r'(\[\(NP\)[^\[\]]+\])?\s*(([^\[\]]+\s*\(ADV\))?\s*[^\[\]]+\s*\(VERB\).*)(\s*\[\(NP\)[^\[\]]+\])?', parsed_text)
 
-    return list(set(results))
+    return list(set(match)), parsed_text
 
 # NP1 becomes (ADV) ADJ and causes NP2,..., NPn, NP2 is an effect of ADJ NP1. e.g., Light becomes (too/very) faint and causes camera sensor noise.
 def nps(parsed_text):
     results = []
     #nps += re.findall(r'(\[\(NP\)\s*[^\[\]]+\s*\])\s*[^\[\]\(\)]+\s*\(AUX\)\s*([^\[\]\(\)]+\s*\(ADJ\))|(\[\(NP\)\s*[^\[\]]+\s*\])\s*[^\[\]\(\)]+\s*\(AUX\)\s*([^\[\]\(\)]+\s*\(ADV\)\s*[^\[\]\(\)]+\s*\(ADJ\))', parsed_text)
 
-    #TODO: mark them with something else to use with VP
-    #include NP of NP as an NP
+    # Calibration: captured camera noise, increased noise, captured should be ADJ (if verb is inside an NP, it should be an adjective)
+    #nps = re.findall(r'(\[\(NP\)\s*[^\[\]]+ \(VERB\)\s*[^\[\]]+ \(NOUN\)[^\[\]]*\])', parsed_text)
 
-
-    # more contrast (NP that has adj in them)
+    # more contrast (NP that has adj in them) Calibration: some times ADJ is misclassified as ADV
     #nps = re.findall(r'\[\(NP\)(\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(ADJ\))(\s*[^\[\]]+ \(NOUN\)+)\]|\[\(NP\)(\s*[^\[\]]+ \(ADJ\))(\s*[^\[\]]+ \(NOUN\)+)\]|\[\(NP\)(\s*[^\[\]]+ \(ADV\))(\s*[^\[\]]+ \(NOUN\)+)\]', parsed_text)
-    nps = re.findall(r'(\[\(NP\)\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(ADJ\)\s*[^\[\]]+ \(NOUN\)+\])|(\[\(NP\)\s*[^\[\]]+ \(ADJ\)\s*[^\[\]]+ \(NOUN\)+\])|(\[\(NP\)\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(NOUN\)+\])', parsed_text)
+    #nps += re.findall(r'(\[\(NP\)\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(ADJ\)\s*[^\[\]]+ \(NOUN\)[^\[\]]*\])|(\[\(NP\)\s*[^\[\]]+ \(ADJ\)\s*[^\[\]]+ \(NOUN\)[^\[\]]*\])|(\[\(NP\)\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(NOUN\)[^\[\]]*\])', parsed_text)
 
     # loss of contrast
     #nps += re.findall(r'(\[\(NP\)[^\[\]]+\]\sof\s\(ADP\)\s*\[\(NP\)[^\[\]]+\])', parsed_text)
 
     # distortion, blur
-    nps += re.findall(r'^(\[\(NP\)[^\[\]]+\])$|^(\[\(NP\)[^\[\]]+\])\s*[,\.:]|[,\.:](\[\(NP\)[^\[\]]+\])\s*[,\.:]', parsed_text)
+    #nps += re.findall(r'^(\[\(NP\)[^\[\]]+\])$|^(\[\(NP\)[^\[\]]+\])\s*[,\.:]|[,\.:](\[\(NP\)[^\[\]]+\])\s*[,\.:]', parsed_text)
+
+    
 
     #contrast is more
-    nps += re.findall(r'(\[\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(ADJ\))|\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]]+ \(ADJ\))', parsed_text)
+    #nps += re.findall(r'(\[\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]]+ \(ADV\)\s*[^\[\]]+ \(ADJ\))|\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]]+ \(ADJ\))|\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]]+ \(ADV\))|\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]]+ \(VERB\))', parsed_text)
+
+    nps = re.findall(r'(\[\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+    nps += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+    nps += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+    nps += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+    parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+    nps += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\))', parsed_text)
+    parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\))', '', parsed_text)
+
+    nps += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(VERB\))', parsed_text)
+    parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(VERB\))', '', parsed_text)
+
+    nps += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', parsed_text)
+    parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', '', parsed_text)
+
+    nps += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', parsed_text)
+    parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', '', parsed_text)
+
+    nps += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\))', parsed_text)
+    parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\))', '', parsed_text)
+
+    nps += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', parsed_text)
+    parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', '', parsed_text)
+
+    nps += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', parsed_text)
+    parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', '', parsed_text)
 
     #e.g., ..
-    nps += re.findall(r'e.g.\s*\(ADV\)(.*)', parsed_text)
+    #nps += re.findall(r'e.g.\s*\(ADV\)(.*)', parsed_text)
 
+    nps += re.findall(r'(\[\(NP\)\s*[^\[\]]+\])', parsed_text)
+    parsed_text = re.sub('(\[\(NP\)\s*[^\[\]]+\])', '', parsed_text)
 
-    for i in range(len(nps)):
-        if isinstance(nps[i], str):
-            results.append(nps[i])
-        else:
-            results.append(max(nps[i], key=len))
+    #for i in range(len(nps)):
+    #    if isinstance(nps[i], str):
+    #        results.append(nps[i])
+    #    else:
+    #        results.append(max(nps[i], key=len))
 
-    return list(set(results))
-    print(nps)
+    return list(set(nps)), parsed_text
+    #print(nps)
     #return [np for np in nps if 'ADJ' in np and 'NOUN' in np]
     for i in range(len(nps)):
         ADJ = None
@@ -211,38 +254,100 @@ def eg(parsed_text):
 
 
 
-def parce(entry): # meaning needs pair of N, ADJ (ADV ADJ)
+def parse(entry): # meaning needs pair of N, ADJ (ADV ADJ)
     # TODO: output pairs of info and match transformations according to the pairs (pairs are each match)
     results = []
     # np (Done)
     entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'
     #print(entry_text)
-    if 'more' in entry.guide_word or 'less' in entry.guide_word:
+    #if 'more' in entry.guide_word or 'less' in entry.guide_word:
         # TODO: in the end I am only looking for adj and verb + NP
         # adj N, N is adj
         # V N
         # only N
-        print('------------------------------------------')
-        print(entry_text)
-        for s in [entry.meaning, entry.consequence, entry.risk]:
-            
-            if s.strip() == '':
-                continue
-            if s.startswith('see') or s.startswith('also: see'):
-                continue
-            text = parse_text(s.lower())
-            print(text)
+        #print('------------------------------------------')
+        #print(entry_text)
+    for s in [entry.meaning, entry.consequence, entry.risk]:
         
-            # once match remove?
-            results += nps(text)
-            #results += np_is(text)
-            results += vps(text)
-            #results += eg(text)
-            #results += than_expected(text)
-            #results += np_caused_by_np(text)
-            # TODO: have to remove the (ADJ) and find longest match(?)
-            
-            entry.matching.append(results)
+        if s.strip() == '':
+            continue
+        if s.startswith('see') or s.startswith('also: see') or 'algorithm' in s:
+            continue
+
+        parsed_text = parse_text(s.lower())    
+        print(parsed_text)
+        # once match remove?
+
+
+        # ADJ: ADJ, ADV, ADV ADJ, ADV or ADV ADJ, ADV ADJ or ADv
+        # ADJ: *ADV? (or ADV)* ADJ or*)*
+
+        match = re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]]+\s*\(VERB\))', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]]+\s*\(VERB\))', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\)\s*[^\[\]]+\s*\(ADV\))', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\)\s*[^\[\]]+\s*\(ADV\))', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\))', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(VERB\))', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+        match += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
+        parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
+
+        match += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\))', parsed_text)
+        parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADV\))', '', parsed_text)
+
+        match += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(VERB\))', parsed_text)
+        parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(VERB\))', '', parsed_text)
+
+        match += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', parsed_text)
+        parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', '', parsed_text)
+
+        match += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\))', parsed_text)
+        parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\))', '', parsed_text)
+
+        match += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', parsed_text)
+        parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADJ\))', '', parsed_text)
+
+        match += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', parsed_text)
+        parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', '', parsed_text)
+
+        match += re.findall(r'([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', parsed_text)
+        parsed_text = re.sub('([^\[\]\(\)\s]+\s*\(CCONJ\)\s*[^\[\]\(\)\s]+\s*\(ADV\)\s*[^\[\]\(\)\s]+\s*\(VERB\))', '', parsed_text)
+
+        #e.g., ..
+        #nps += re.findall(r'e.g.\s*\(ADV\)(.*)', parsed_text)
+
+        match += re.findall(r'(\[\(NP\)\s*[^\[\]]+\])', parsed_text)
+        parsed_text = re.sub('(\[\(NP\)\s*[^\[\]]+\])', '', parsed_text)
+        #results += eg(text)
+        #results += than_expected(text)
+        #results += np_caused_by_np(text)
+        #results += np_is(text)
+
+        for text in match:
+            text = re.sub('\([^\(\)]+\)', '', text)
+            text = re.sub('\[', '', text)
+            text = re.sub('\]', '', text)
+            text = re.sub('\s+', ' ', text)
+            text = text.strip()
+            if text not in entry.matching:# and 'confuse' not in text: # temp: confuse usually describes the effect of the transformation on algorithms rather than images
+                entry.matching.append(text)
             
             #if results == []:
             #    print('------------------------------------------')
@@ -250,9 +355,9 @@ def parce(entry): # meaning needs pair of N, ADJ (ADV ADJ)
             #    print(text)
             #    print(results)
         #results = from_pattern_to_match(results)
-        print(results)
-        print('------------------------------------------')
-    return set(results)
+        #print(results)
+        #print('------------------------------------------')
+    return entry.matching
     if 'more' in entry.guide_word or 'less' in entry.guide_word:
         print('------------------------------------------')
         print(text)
