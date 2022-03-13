@@ -88,7 +88,8 @@ class CV_HAZOP_checklist:
         self.abbr_replacement['prop.'] = 'property'
         self.abbr_replacement['pol.'] = 'polarized'
         self.abbr_replacement['fov.'] = 'field of view' 
-        self.abbr_replacement['fov'] = 'field of view' 
+        self.abbr_replacement['fov'] = 'field of view'
+        self.abbr_replacement['num.'] = 'number'  
         self.abbr_replacement['/'] = ' or ' 
         self.abbr_replacement['('] = '' 
         self.abbr_replacement[')'] = '' 
@@ -117,6 +118,13 @@ class CV_HAZOP_checklist:
             self.entries[entry.location][entry.parameter][entry.guide_word].append(entry)
             self.all_entries.append(entry)
 
+    def keywords_with_see(self):
+        list_locations = set([e.location for e in self.all_entries])
+        list_parameters = set([e.parameter for e in self.all_entries])
+        list_guidewords  =set([e.guide_word for e in self.all_entries])
+        #for e in self.all_entries:
+        #    ?
+        return 0
 
     def print_abbrv(self):
         self.abbr = []

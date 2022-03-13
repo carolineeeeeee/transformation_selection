@@ -8,8 +8,25 @@ from nltk.stem import PorterStemmer
 porter = PorterStemmer()
 
 
-def find_keywords(text, stemmed_keywords): 
+def find_keywords(texts, stemmed_keywords, is_transf=False): 
     # stem everything, loop over keywords to find matches
+    results = []
+    for text in texts:
+        token_words=word_tokenize(text)
+        stemmed = {porter.stem(word) for word in token_words}
+        #results += list([w for w in stemmed_keywords.keys() if any([all([t in stemmed for t in word_tokenize(s)]) for s in stemmed_keywords[w]])])
+        if is_transf:
+            results += list([w for w in stemmed_keywords.keys() if set(stemmed) >= set(word_tokenize(stemmed_keywords[w][0]))])
+        else:
+            results += list([w for w in stemmed_keywords.keys() if any([set(stemmed) >= set(word_tokenize(s)) for s in stemmed_keywords[w]])])
+    to_remove = []
+    for w in list(set(results)):
+        if ' ' in w:
+            splitted = w.split()
+            #if 'image' not in splitted:
+            to_remove += splitted
+    return [w for w in results if w not in to_remove] 
+    '''
     token_words=word_tokenize(text)
     stemmed = [porter.stem(word) for word in token_words]
     clean_text = ' ' + " ".join(stemmed) + ' '    
@@ -21,6 +38,7 @@ def find_keywords(text, stemmed_keywords):
             to_remove += w.split()
         
     return [w for w in found_keywords if w not in to_remove] 
+    '''
 
 def group_keywords(entry_keywords_to_transf, stemmed_keywords):
     grouped_match = {}
@@ -78,7 +96,7 @@ def load_keywords(keywords_file):
             keywords[w] = []
             keywords[w].append(clean_words)
             synonyms = list(set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets(w)])))
-            synonyms = [porter.stem(s) for s in synonyms] # including the original word
+            synonyms = [porter.stem(s) for s in synonyms if 'random' not in s] # including the original word
             if abbrv:
                 synonyms.append(abbrv)
             keywords[w] += synonyms

@@ -68,9 +68,10 @@ def parse_transformations(filename, keywords):
 	transformations_keywords = {}
 	for transf in transformations:
 		transformations_keywords[transf.name] = []
-		t_keywords = find_keywords(transf.name + ' ' + transf.description, keywords)
+		t_keywords = find_keywords([transf.name, transf.description], keywords, is_transf=True)
 		transformations_keywords[transf.name] += t_keywords
 		all_keywords += t_keywords
+		
 
 	# remove keywords not meaningful (appear in at least half of the transformations)
 	to_remove = []
@@ -82,6 +83,8 @@ def parse_transformations(filename, keywords):
 		new_value = [w for w in transformations_keywords[t.name] if w not in to_remove]
 		t.keywords = new_value
 		transformations_keywords[t.name] = new_value
-	#print(transformations_keywords)
-	#exit()
+
+	#print(transformations_keywords['Random Brightness'])
+	#print(transformations_keywords['ISO Noise'])
+	#print(transformations_keywords['Random Snow'])
 	return transformations

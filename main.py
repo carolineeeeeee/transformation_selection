@@ -23,12 +23,17 @@ all_keywords = []
 #entries.all_entries = [e for e in entries.all_entries if e.risk_id in ['123', '124', '125', '126', '127', '128']]
 
 # randomly select a few entries and check 
-entries.all_entries = random.sample(entries.all_entries, 20)
+#entries.all_entries = random.sample(entries.all_entries, 20)
+#entries.all_entries = [e for e in entries.all_entries if 'noise' in e.consequence or  'noise' in e.risk or  'noise' in e.meaning] 
 
 for entry in entries.all_entries:
     entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
-    print('---------------' + entry.risk_id +'-----------------')
-    print(entry_text)
+    if 'see' in entry_text:
+        print('---------------' + entry.risk_id +'-----------------')
+        print(entry_text)
+        continue
+    else:
+        continue
     parse(entry)
     #print(results)
     print(entry.matching)
@@ -39,15 +44,16 @@ for entry in entries.all_entries:
     #cur_meaning = entry.risk.strip()
     #
     # lemmetize and find keywords
-    entry_keywords = find_keywords(' '.join(entry.matching), keywords)
+    entry_keywords = find_keywords(entry.matching, keywords)
     entry.keywords = entry_keywords
-    #print(entry_keywords)
+    print(entry_keywords)
     all_keywords += entry_keywords
     # TODO: deal with see
+
     continue
+exit()
 
 # TODO: update this to check per location
-'''
 to_remove = []
 for k in set(all_keywords):
     if len([e for e in entries.all_entries if k in e.keywords]) >= 0.5*len(entries.all_entries):
@@ -58,13 +64,12 @@ for e in entries.all_entries:
     e.keywords = new_value
     print(e.matching)
     print(new_value)
-exit()
-'''
+    
 
 for entry in entries.all_entries:
     # match with transformations
     entry_keywords_to_transf[entry.risk_id] = {}
-    entry_keywords = ['camera', 'interference', 'noise']#entry.keywords
+    #entry_keywords = ['camera', 'interference', 'noise']#entry.keywords
     #entry_keywords = entries_keyword[entry.risk_id]
     if len(entry_keywords) == 0:
         continue
@@ -90,8 +95,8 @@ for entry in entries.all_entries:
 #increase_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('increase')]))
 #decrease_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('decrease')]))
 
-#print(entry_keywords_to_transf)
+print(entry_keywords_to_transf['1173'])
 #print(not_found)
 
-group_keywords(entry_keywords_to_transf, keywords)
+#group_keywords(entry_keywords_to_transf, keywords)
 

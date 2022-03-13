@@ -5,6 +5,8 @@ import itertools
 from nltk.corpus import wordnet as wn
 import re
 
+# if np we treat as NP, otherwise check adj
+
 nlp = spacy.load("en_core_web_lg")
 
 def parse_text(text):
@@ -14,6 +16,8 @@ def parse_text(text):
     for token in doc:
         if token.pos_ == 'PUNCT':
             text += token.text + ' '
+        if token.pos_ == 'SPACE':
+            continue
         #if len(re.findall(r'\[[^\[\]]*'+token.text + '[^\[\]]*\]', text)) == 0:
         new_text += token.text+ ' (' +  token.pos_ +') ' #re.sub('(' + token.text + ')', '[\g<1> (' + token.pos_ +')]', text)
     
@@ -97,6 +101,7 @@ def nps(parsed_text):
     nps += re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
     parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
 
+    # AUX or ADP, combination of less?
     nps += re.findall(r'\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADJ\))', parsed_text)
     parsed_text = re.sub('\[(\(NP\)[^\[\]]+\]\s[a-z]+\s\(AUX\)+\s*[^\[\]\s]+\s*\(ADJ\))', '', parsed_text)
 
@@ -279,8 +284,9 @@ def parse(entry): # meaning needs pair of N, ADJ (ADV ADJ)
         # once match remove?
 
 
-        # ADJ: ADJ, ADV, ADV ADJ, ADV or ADV ADJ, ADV ADJ or ADv
-        # ADJ: *ADV? (or ADV)* ADJ or*)*
+        # ADJ: NP? *ADV? (or ADV)* ADJ or*)* NP? need maximum match
+        # VERB: NP? *ADV? (or ADV)* VERB or*)* NP? need maximum match
+        # NP (leftover)
 
         match = re.findall(r'(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', parsed_text)
         parsed_text = re.sub('(\[\(NP\)[^\[\]]+\]\s*[^\[\]\s]+\s*\(ADV\)\s*[^\[\]\s]+\s*\(VERB\)\s*\[\(NP\)[^\[\]]+\])', '', parsed_text)

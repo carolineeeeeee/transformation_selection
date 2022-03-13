@@ -21,7 +21,7 @@ No.| name | source | description | CV-HAZOP location, parameter | supported guid
 18|CLAHE|albumentations| Apply Contrast Limited Adaptive Histogram Equalization to the input image. | Observer, Quality; Light Sources, Texture | All| 
 19|Channel Dropout|albumentations| Randomly Drop Channels in the input Image. | Observer, Spectral efficiency | Less|
 20|Channel Shuffle|albumentations| Randomly rearrange channels of the input RGB image. | Observer, Spectral efficiency | Other than|
-21|Color Jitter|albumentations|Randomly changes the brightness, contrast, and saturation of an image. Compared to ColorJitter from torchvision, this transform gives a little bit different results because Pillow (used in torchvision) and OpenCV (used in Albumentations) transform an image to HSV format by different formulas. Another difference - Pillow uses uint8 overflow, but we use value saturation. | Light Sources, Intensity; Light Sources, Spectrum; Observer, Quality | All;All;All |  
+21|Color Jitter|albumentations|Randomly changes the brightness, contrast, and saturation of an image.  | Light Sources, Intensity; Light Sources, Spectrum; Observer, Quality | All;All;All |  
 22|Downscale|albumentations| Decreases image quality by downscaling and upscaling back. | Observer, Quantization/Sampling | Less | 
 23|Emboss|albumentations| Emboss the input image and overlays the result with the original image. | -,- | - |   
 24|Equalize|albumentations|Equalize the image histogram. | Observer, Quality |  More | contrast
