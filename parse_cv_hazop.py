@@ -53,9 +53,9 @@ class CV_HAZOP_entry:
     
     def update_abbrv(self, abbrv_dict):
         for k in abbrv_dict:
-            self.meaning = (self.meaning.lower()).replace(k, abbrv_dict[k])
-            self.consequence = (self.consequence.lower()).replace(k, abbrv_dict[k])
-            self.risk = (self.risk.lower()).replace(k, abbrv_dict[k])
+            self.meaning = (self.meaning.lower()+ ' ').replace(k, abbrv_dict[k])
+            self.consequence = (self.consequence.lower() + ' ').replace(k, abbrv_dict[k])
+            self.risk = (self.risk.lower() + ' ').replace(k, abbrv_dict[k])
         return 0
 
 class CV_HAZOP_checklist:
@@ -70,6 +70,7 @@ class CV_HAZOP_checklist:
         self.abbr_replacement['temp.'] = 'temporal'
         self.abbr_replacement['transp.'] = 'transparent'
         self.abbr_replacement['pos.'] = 'position'
+        self.abbr_replacement['pos '] = 'position '
         self.abbr_replacement['compl.'] = 'complexity'
         self.abbr_replacement['appl.'] = 'application'
         self.abbr_replacement['trans.'] = 'transparent'
@@ -121,10 +122,62 @@ class CV_HAZOP_checklist:
     def keywords_with_see(self):
         list_locations = set([e.location for e in self.all_entries])
         list_parameters = set([e.parameter for e in self.all_entries])
-        list_guidewords  =set([e.guide_word for e in self.all_entries])
-        #for e in self.all_entries:
-        #    ?
-        return 0
+        list_guidewords  = {'No':'No (not none)', 'More':'More (more of, higher)', 'Less':'Less (less of, lower)', 
+        'As well as':'As well as', 'Part of':'Part of', 'Reverse':'Reverse', 
+        'Other than':'Other than', 'Where else':'Where else', 'Spatial periodic':'Spatial periodic', 
+        'Spatial aperiodic':'Spatial aperiodic', 'Close':'Close', 'Remote':'Remote', 'In front of':'In front of', 'Behind':'Behind'}
+        list_title = {'meaning':0, 'consequence':1, 'risk':2}
+        for e in self.all_entries:
+            if e.risk_id in ['1002', '817']:
+                continue
+            for text, index in [(e.meaning.lower(), 0), (e.consequence.lower(), 1), (e.risk.lower(), 2)]:
+                if 'see' in text.split():
+                    if len(text.split()) > 5:
+                        print(e.risk_id)
+                        print(text)
+                    title = [list_title[t] for t in list_title if t  in text ]     
+                       
+                    location = [l for l in list_locations if  l.lower() in  text ]
+                    
+                    parameter = [p for p in list_parameters if p.lower() in   text ]
+                    
+                    guideword = [g for g in list_guidewords if g.lower() in  text ]
+                    if 'other than expected' in text:
+                        guideword.remove('Other than')
+
+                    if len(text.split()) > 5:
+                        print(title, location, parameter, guideword)
+                    if title == [] and location == [] and parameter == [] and guideword == []:
+                        continue
+
+                    if title == []:
+                        title.append(index)     
+                    if location == []:
+                        location.append(e.location)
+                    if parameter == []:
+                        parameter.append(e.parameter)
+                    if guideword == []: 
+                        guideword.append(e.guide_word)
+                    
+                    for l in location:
+                        for p in parameter:
+                            for g in guideword:
+                                for t in title:
+                                    #print(l,p,g, t)
+                                    try:
+                                        corresponding_entry = self.entries[l][p][list_guidewords[g]]
+                                        # if a number is specified
+                                        number = [int(i) for i in text if i.isdigit()]
+                                        if number == []:
+                                            for c_e in corresponding_entry:
+                                                if len(c_e.keywords) > t:
+                                                    #e.keywords[t] += c_e.keywords[t]
+                                                    e.keywords.append(c_e.keywords[t])
+                                        else:
+                                            if len(corresponding_entry[number[0]].keywords) > t:
+                                                e.keywords.append(corresponding_entry[number[0]].keywords[t])
+                                    except:
+                                        continue
 
     def print_abbrv(self):
         self.abbr = []

@@ -10,22 +10,37 @@ porter = PorterStemmer()
 
 def find_keywords(texts, stemmed_keywords, is_transf=False): 
     # stem everything, loop over keywords to find matches
-    results = []
-    for text in texts:
-        token_words=word_tokenize(text)
-        stemmed = {porter.stem(word) for word in token_words}
-        #results += list([w for w in stemmed_keywords.keys() if any([all([t in stemmed for t in word_tokenize(s)]) for s in stemmed_keywords[w]])])
-        if is_transf:
+    
+
+    if is_transf:
+        results = []
+        for text in texts:
+            token_words=word_tokenize(text)
+            stemmed = {porter.stem(word) for word in token_words}
             results += list([w for w in stemmed_keywords.keys() if set(stemmed) >= set(word_tokenize(stemmed_keywords[w][0]))])
-        else:
-            results += list([w for w in stemmed_keywords.keys() if any([set(stemmed) >= set(word_tokenize(s)) for s in stemmed_keywords[w]])])
-    to_remove = []
-    for w in list(set(results)):
-        if ' ' in w:
-            splitted = w.split()
-            #if 'image' not in splitted:
-            to_remove += splitted
-    return [w for w in results if w not in to_remove] 
+            to_remove = []
+        for w in list(set(results)):
+            if ' ' in w:
+                splitted = w.split()
+                #if 'image' not in splitted:
+                to_remove += splitted
+        return [w for w in results if w not in to_remove] 
+    else:
+        all_results = []
+        for l in texts:
+            results = []
+            for text in l:
+                token_words=word_tokenize(text)
+                stemmed = {porter.stem(word) for word in token_words}
+                results += list([w for w in stemmed_keywords.keys() if any([set(stemmed) >= set(word_tokenize(s)) for s in stemmed_keywords[w]])])
+            to_remove = []
+            for w in list(set(results)):
+                if ' ' in w:
+                    splitted = w.split()
+                    #if 'image' not in splitted:
+                    to_remove += splitted
+            all_results.append([w for w in results if w not in to_remove] )
+    return all_results
     '''
     token_words=word_tokenize(text)
     stemmed = [porter.stem(word) for word in token_words]

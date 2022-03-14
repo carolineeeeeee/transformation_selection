@@ -3,18 +3,22 @@ from parse_transformations import *
 from utils import *
 from pattern_matching import *
 import random
+import pickle
+
+entry_keywords_to_transf = {}
+
 
 entry_file = 'cv_hazop_all.csv'#'cv_hazop_light_sources.csv'
 glossary_file = 'image_processing_terms.txt' #'image_processing_glossary.txt'
 keywords = load_keywords(glossary_file)
 transformations = parse_transformations('transformations.md', keywords)
+'''
 entries = CV_HAZOP_checklist(entry_file)
 
 #check_parcing('object more transparent than expected')
 #check_parcing('some processing is much faster than expected')
 #exit()
 
-entry_keywords_to_transf = {}
 not_found = []
 cur_meaning = ''
 all_keywords = []
@@ -24,20 +28,19 @@ all_keywords = []
 
 # randomly select a few entries and check 
 #entries.all_entries = random.sample(entries.all_entries, 20)
-#entries.all_entries = [e for e in entries.all_entries if 'noise' in e.consequence or  'noise' in e.risk or  'noise' in e.meaning] 
+#entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
+
 
 for entry in entries.all_entries:
     entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
-    if 'see' in entry_text:
-        print('---------------' + entry.risk_id +'-----------------')
-        print(entry_text)
-        continue
-    else:
-        continue
+    #if 'see' in entry_text:
+    print('---------------' + entry.risk_id +'-----------------')
+    #print(entry_text)
+
     parse(entry)
     #print(results)
-    print(entry.matching)
-    print('--------------------------------')
+    #print(entry.matching)
+    #print('--------------------------------')
 
     #if entry.risk.strip() != cur_meaning:
     #   results = parce(entry)
@@ -46,31 +49,38 @@ for entry in entries.all_entries:
     # lemmetize and find keywords
     entry_keywords = find_keywords(entry.matching, keywords)
     entry.keywords = entry_keywords
-    print(entry_keywords)
-    all_keywords += entry_keywords
+    #print(entry_keywords)
+    all_keywords += list(itertools.chain.from_iterable(entry_keywords))
     # TODO: deal with see
-
-    continue
-exit()
 
 # TODO: update this to check per location
 to_remove = []
 for k in set(all_keywords):
-    if len([e for e in entries.all_entries if k in e.keywords]) >= 0.5*len(entries.all_entries):
+    if len([e for e in entries.all_entries if k in list(itertools.chain.from_iterable(e.keywords))]) >= 0.5*len(entries.all_entries):
         to_remove.append(k)
-for e in entries.all_entries:
-    print((e.meaning + '. ' + e.consequence + '. ' + e.risk).lower() + '.')
-    new_value = [w for w in e.keywords if w not in to_remove]
-    e.keywords = new_value
-    print(e.matching)
-    print(new_value)
-    
 
+for e in entries.all_entries:
+    #print((e.meaning + '. ' + e.consequence + '. ' + e.risk).lower() + '.')
+    new_value = list([list([w for w in l if w not in to_remove]) for l in e.keywords])
+    e.keywords = new_value
+    #print(e.matching)
+    #print(new_value)
+
+with open('cv_hazop.pickle', 'wb') as handle:
+    pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
+'''
+with open('cv_hazop.pickle', 'rb') as handle:
+    entries = pickle.load(handle)
+
+entries.keywords_with_see()
+#print(entries.entries['Light Sources']['Number']['Spatial aperiodic'][0].keywords)
+#exit()
 for entry in entries.all_entries:
     # match with transformations
     entry_keywords_to_transf[entry.risk_id] = {}
     #entry_keywords = ['camera', 'interference', 'noise']#entry.keywords
     #entry_keywords = entries_keyword[entry.risk_id]
+    entry_keywords = list(itertools.chain.from_iterable(entry.keywords))
     if len(entry_keywords) == 0:
         continue
     for word in entry_keywords:

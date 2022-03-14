@@ -277,6 +277,7 @@ def parse(entry): # meaning needs pair of N, ADJ (ADV ADJ)
         if s.strip() == '':
             continue
         if s.startswith('see') or s.startswith('also: see') or 'algorithm' in s:
+            entry.matching.append([])
             continue
 
         parsed_text = parse_text(s.lower())    
@@ -345,15 +346,16 @@ def parse(entry): # meaning needs pair of N, ADJ (ADV ADJ)
         #results += than_expected(text)
         #results += np_caused_by_np(text)
         #results += np_is(text)
-
+        results = []
         for text in match:
             text = re.sub('\([^\(\)]+\)', '', text)
             text = re.sub('\[', '', text)
             text = re.sub('\]', '', text)
             text = re.sub('\s+', ' ', text)
             text = text.strip()
-            if text not in entry.matching:# and 'confuse' not in text: # temp: confuse usually describes the effect of the transformation on algorithms rather than images
-                entry.matching.append(text)
+            if text not in results:# and 'confuse' not in text: # temp: confuse usually describes the effect of the transformation on algorithms rather than images
+                results.append(text)
+        entry.matching.append(results)
             
             #if results == []:
             #    print('------------------------------------------')
