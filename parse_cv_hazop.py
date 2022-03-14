@@ -170,12 +170,12 @@ class CV_HAZOP_checklist:
                                         number = [int(i) for i in text if i.isdigit()]
                                         if number == []:
                                             for c_e in corresponding_entry:
-                                                if len(c_e.keywords) > t:
-                                                    #e.keywords[t] += c_e.keywords[t]
-                                                    e.keywords.append(c_e.keywords[t])
+                                                #if len(c_e.keywords) > t:
+                                                e.keywords[t] += c_e.keywords[t]
+                                                    #e.keywords.append(c_e.keywords[t])
                                         else:
-                                            if len(corresponding_entry[number[0]].keywords) > t:
-                                                e.keywords.append(corresponding_entry[number[0]].keywords[t])
+                                            #if len(corresponding_entry[number[0]].keywords) > t:
+                                            e.keywords.append(corresponding_entry[number[0]].keywords[t])
                                     except:
                                         continue
 

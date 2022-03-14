@@ -69,18 +69,19 @@ for e in entries.all_entries:
 with open('cv_hazop.pickle', 'wb') as handle:
     pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
 '''
+
 with open('cv_hazop.pickle', 'rb') as handle:
     entries = pickle.load(handle)
 
 entries.keywords_with_see()
 #print(entries.entries['Light Sources']['Number']['Spatial aperiodic'][0].keywords)
-#exit()
+exit()
 for entry in entries.all_entries:
     # match with transformations
     entry_keywords_to_transf[entry.risk_id] = {}
     #entry_keywords = ['camera', 'interference', 'noise']#entry.keywords
     #entry_keywords = entries_keyword[entry.risk_id]
-    entry_keywords = list(itertools.chain.from_iterable(entry.keywords))
+    entry_keywords = list(set(itertools.chain.from_iterable(entry.keywords)))
     if len(entry_keywords) == 0:
         continue
     for word in entry_keywords:
@@ -93,14 +94,14 @@ for entry in entries.all_entries:
                 if t not in entry_keywords_to_transf[entry.risk_id][word]:
                     entry_keywords_to_transf[entry.risk_id][word].append(t.name)
     continue
-    nlp = spacy.load("en_core_web_lg")
-    doc = nlp(entry_text)
+    #nlp = spacy.load("en_core_web_lg")
+    #doc = nlp(entry_text)
 
-    for token in doc:
-        print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-                token.shape_, token.is_alpha, token.is_stop)
-    for np in doc.noun_chunks:
-        print(np.text)
+    #for token in doc:
+    #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
+    #            token.shape_, token.is_alpha, token.is_stop)
+    #for np in doc.noun_chunks:
+    #    print(np.text)
 #patterns = [('increase', NP), ('decrease', NP), ('too', ADJ)]
 #increase_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('increase')]))
 #decrease_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('decrease')]))
