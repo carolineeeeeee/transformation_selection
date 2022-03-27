@@ -1,90 +1,111 @@
 # a collection of transformations
 from utils import *
+import pandas as pd
+import json
+from pattern_matching import *
+import itertools
+import math 
+from nltk.corpus import stopwords
+import yake
+
 
 class Transformation:
 	"""A class for transformation information"""
-	line = ''
-	name = ''
-	source = ''
-	description = ''
 
 	# TODO: later update format
-	def __init__(self, info_line):
+	def __init__(self, index, row):
 		self.keywords = []
-		self.line = info_line
-		self.CV_location_parameter = [] # [(light sources, intensity), (Medium, Transparency)]
-		self.CV_guideword = [] # [(Less, No), (All)] loop both of them with indices
-		self.effect = []
-		infos = info_line.split('|')
-		if len(infos) < 7:
-			raise Exception('not enough columns, expected 7 got ' + str(len(infos)) + ': ' + info_line)
-		self.name = infos[1].strip()
-		self.source = infos[2].strip()
-		self.description = infos[3].strip()
-		list_loc_param = (infos[4].strip()).split(';')
-		for item in list_loc_param:
-			loc, param = item.split(',')
-			loc = loc.strip()
-			param = param.strip()
-			(self.CV_location_parameter).append((loc, param))
-		list_guide_words = (infos[5].strip()).split(';')
-		for item in list_guide_words:
-			guide_words = tuple(item.strip().split(',')) 
-			self.CV_guideword.append(guide_words)
-		effects = infos[6].strip().split(',')
-		for word in effects:
-			if word != '':
-				self.effect.append(word.strip())
-
-
+		self.index = index
+		self.row = row
+		self.name = row['Name']
+		self.source = row['Source']
+		if isinstance(row['Description'], str):
+			self.description = row['Description']
+		else:
+			self.description = ''
+		self.parameters = json.loads(row['Patameters'])
+		self.match = []
+	
 	def __str__(self):
 		results = ''
 		results += 'name: ' + self.name + ', \n'
 		results += 'source: ' + self.source + ', \n'
 		results += 'description: ' + self.description + ', \n'
-		results += 'effect: ' + str(self.effect)
+		results += 'parameters: ' + str(self.parameters)
 		return results
 
-def parse_transformations(filename, keywords):
-	transformations = []
-	f = open(filename, "r")
-	line = f.readline()
-	while line:
-		if '|' in line:
-			break
-		line = f.readline()
-	line = f.readline()
-	line = f.readline()# column name + format line
+class TransformationList:
+	"""A class for a library of transformations"""
+	def __init__(self, filename):
+		self.filename = filename
+		self.all_transformations = []
+		self.parse_transformations(self.filename)
 
-	while line:
-		if 'END' in line:
-			break
-		trans_entry = Transformation(line)
-		transformations.append(trans_entry)
-		line = f.readline()
+	def parse_transformations(self, filename):
+		transformaton_df = pd.read_csv(filename)
+		for index, row in transformaton_df.iterrows():
+			if row['Source'] == 'albumentations':
+				trans_entry = Transformation(index, row)
+				self.all_transformations.append(trans_entry)
+
+	def match_keywords(self, keywords):
+		# match keywords
+		all_keywords = []
+		transformations_keywords = {}
+		#self.all_transformations = [t for t in self.all_transformations if t.index in [1, 2, 3]]
+		for transf in self.all_transformations:
+			#if 'Grid Distortion' not in transf.name:
+			#	continue
+			print(transf.name)
+			#print(transf.description)
+			#print(type(transf.description))
+
+			transformations_keywords[transf.index] = []
+
+			parsed_results = list(set(itertools.chain.from_iterable(parse_transf(transf))))
+			transf.match = parsed_results
+			print(parsed_results)
+			
+			# first find keywords for names
+			t_keywords = find_keywords(parsed_results, keywords, is_transf=True)
+			print(t_keywords)
+
+			transformations_keywords[transf.index] += t_keywords
+			all_keywords += t_keywords
+			# then find keywords for descriptions using parsed text
+
+		# remove keywords not meaningful (appear in at least half of the transformations)
+		to_remove = []
+		for k in set(all_keywords):
+			if len([t for t in transformations_keywords if k in transformations_keywords[t]]) >= 0.4 * len(self.all_transformations):
+				to_remove.append(k)
+		for transf in self.all_transformations:
+			if transf.index in transformations_keywords:
+				new_value = [w for w in transformations_keywords[transf.index] if w not in to_remove]
+				transf.keywords = set(new_value)
+				transformations_keywords[transf.index] = set(new_value)
+		#print(transformations_keywords['Random Rain'])
+		#print(transformations_keywords['Advanced Blur'])
+		#print(transformations_keywords['Random Snow'])
+		#return transformations
 	
-	# match keywords
-	all_keywords = []
-	transformations_keywords = {}
-	for transf in transformations:
-		transformations_keywords[transf.name] = []
-		t_keywords = find_keywords([transf.name, transf.description], keywords, is_transf=True)
-		transformations_keywords[transf.name] += t_keywords
-		all_keywords += t_keywords
-		
-
-	# remove keywords not meaningful (appear in at least half of the transformations)
-	to_remove = []
-	for k in set(all_keywords):
-		if len([t for t in transformations_keywords if k in transformations_keywords[t]]) >= 0.4 * len(transformations):
-			to_remove.append(k)
-
-	for t in transformations:
-		new_value = [w for w in transformations_keywords[t.name] if w not in to_remove]
-		t.keywords = new_value
-		transformations_keywords[t.name] = new_value
-
-	#print(transformations_keywords['Random Brightness'])
-	#print(transformations_keywords['ISO Noise'])
-	#print(transformations_keywords['Random Snow'])
-	return transformations
+	def extract_terms(self):
+		# we should ignore descriptions of the values and examples 
+		# description of the values should be used to determine the guideword
+		# also remove dfault is
+		kw_extractor = yake.KeywordExtractor(top=10, stopwords=stopwords.words('english'))
+		for t in self.all_transformations:
+			print('------------' + t.name + '-------------')
+			print('Keywords (old):')
+			print(t.keywords)
+			print('Our match:')
+			print(t.match)
+			full_text = t.name + ': ' + t.description + ', \n'
+			for param in t.parameters:
+				full_text += param + ': ' + t.parameters[param] + '\n'
+			print(full_text)
+			keywords = kw_extractor.extract_keywords(full_text)
+			for kw, v in keywords:
+				print("Keyphrase: ",kw, ": score", v)
+			print('--------------------------------------------')
+		#return 0

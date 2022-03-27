@@ -3509,3 +3509,9 @@ zoom
 zoom lens
 Zucker--Hummel operator
 Zuniga--Haralick operator
+channel
+overexposure
+underexposure
+corp
+flip
+resize

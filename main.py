@@ -4,80 +4,177 @@ from utils import *
 from pattern_matching import *
 import random
 import pickle
+import os
+#print(reduce('median filter'))
+#print(reduce('filter'))
+#print(reduce('blurry image'))
+#print(reduce('blur'))
+#print(list(set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('spectrum')]))))
 
+from sentence_transformers import SentenceTransformer
+from sklearn.metrics.pairwise import cosine_similarity
+# manually checking the similairty approach
 entry_keywords_to_transf = {}
 
-
-entry_file = 'cv_hazop_all.csv'#'cv_hazop_light_sources.csv'
 glossary_file = 'image_processing_terms.txt' #'image_processing_glossary.txt'
 keywords = load_keywords(glossary_file)
-transformations = parse_transformations('transformations.md', keywords)
-'''
-entries = CV_HAZOP_checklist(entry_file)
-
-#check_parcing('object more transparent than expected')
-#check_parcing('some processing is much faster than expected')
-#exit()
-
-not_found = []
-cur_meaning = ''
-all_keywords = []
-
-# only looking at a subset
-#entries.all_entries = [e for e in entries.all_entries if e.risk_id in ['123', '124', '125', '126', '127', '128']]
-
-# randomly select a few entries and check 
-#entries.all_entries = random.sample(entries.all_entries, 20)
-#entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
 
 
-for entry in entries.all_entries:
-    entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
-    #if 'see' in entry_text:
-    print('---------------' + entry.risk_id +'-----------------')
-    #print(entry_text)
-
-    parse(entry)
-    #print(results)
-    #print(entry.matching)
-    #print('--------------------------------')
-
-    #if entry.risk.strip() != cur_meaning:
-    #   results = parce(entry)
-    #cur_meaning = entry.risk.strip()
-    #
-    # lemmetize and find keywords
-    entry_keywords = find_keywords(entry.matching, keywords)
-    entry.keywords = entry_keywords
-    #print(entry_keywords)
-    all_keywords += list(itertools.chain.from_iterable(entry_keywords))
-    # TODO: deal with see
-
-# TODO: update this to check per location
-to_remove = []
-for k in set(all_keywords):
-    if len([e for e in entries.all_entries if k in list(itertools.chain.from_iterable(e.keywords))]) >= 0.5*len(entries.all_entries):
-        to_remove.append(k)
-
-for e in entries.all_entries:
-    #print((e.meaning + '. ' + e.consequence + '. ' + e.risk).lower() + '.')
-    new_value = list([list([w for w in l if w not in to_remove]) for l in e.keywords])
-    e.keywords = new_value
-    #print(e.matching)
-    #print(new_value)
-
-with open('cv_hazop.pickle', 'wb') as handle:
-    pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
 '''
 
-with open('cv_hazop.pickle', 'rb') as handle:
-    entries = pickle.load(handle)
+model = SentenceTransformer('bert-base-nli-mean-tokens')
 
-entries.keywords_with_see()
-#print(entries.entries['Light Sources']['Number']['Spatial aperiodic'][0].keywords)
+entry_1159_match = ['Larger pixel size', 'lower noise level', 'less resolution of observer']
+superpixel_match = ['Transform image to their superpixel representation', 'replace pixel within segment by their average color']
+compression_match = ['image compression', 'image quality lower bound', 'image quality upper bound']
+noise_match = ['Apply camera sensor noise']
+trans_matches = [superpixel_match, compression_match, noise_match]
+
+for e_match in entry_1159_match:
+    sentence_embeddings1 = model.encode(e_match)
+    for t_match in trans_matches:
+        for t_m in t_match:
+            print(e_match +'; '+ t_m)
+            sentence_embeddings2 = model.encode(t_m)
+            sim_arr=cosine_similarity(
+                [sentence_embeddings1],
+                [sentence_embeddings2]
+            )
+            print(sim_arr)
+            print('----------------')
 exit()
-for entry in entries.all_entries:
-    # match with transformations
+
+
+
+if os.path.isfile('albumentation.pickle'):
+    with open('albumentation.pickle', 'rb') as handle:
+        transformations = pickle.load(handle)
+else:
+    transformations = TransformationList('transformations.csv')
+    transformations.match_keywords(keywords)
+    with open('albumentation.pickle', 'wb') as handle:
+        pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+for t in transformations.all_transformations:
+    if 'ISO Noise' in t.name:
+        print(t.name)
+        print(t.match)
+        print('------------')
+exit()
+'''
+entry_file = 'exp_entries'#'cv_hazop_all.csv'#'cv_hazop_light_sources.csv'
+
+#if os.path.isfile(entry_file + '.pickle'):
+#    with open(entry_file+'.pickle', 'rb') as handle:
+#        entries = pickle.load(handle)
+#else:
+entries = CV_HAZOP_checklist(entry_file+'.csv')
+entries.match_keywords(keywords)
+with open(entry_file+'.pickle', 'wb') as handle:
+    pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+exit()
+
+location_to_keyword = {}
+unions = set()
+for location in entries.entries:
+    #print(location)
+    entries_at_this_loc = [e for e in entries.all_entries if e.location == location]
+    all_keywords = set(sum([e.keywords[0] for e in entries_at_this_loc], []))
+    if len(unions) > 0:
+        unions = unions.intersection(all_keywords)
+    else:
+        union = all_keywords
+    #print(len(all_keywords))
+    #print(all_keywords)
+
+    location_to_keyword[location] = all_keywords
+    #print('----------------------------------')
+
+#print(len(unions))
+#print(unions)
+'''
+for t in transformations.all_transformations:
+    print(t.name)
+    print(t.keywords)
+    print('-------------------------')
+
+
+# trying unique keywords
+for location1 in location_to_keyword:
+    print(location1)
+    print('old len: ' + str(len(location_to_keyword[location1])))
+    for location2 in location_to_keyword:
+        if location1 != location2:
+            intersect12 = location_to_keyword[location1].intersection(location_to_keyword[location2])
+            location_to_keyword[location1] = location_to_keyword[location1] - intersect12
+    print('new len: ' + str(len(location_to_keyword[location1])))
+    print(location_to_keyword[location1])
+    print('---------------')
+
+exit()
+'''
+location_to_transf = {}
+for location in location_to_keyword:
+    print(location)
+    print('----------------------------------')
+    print('----------------------------------')
+    transf = [t.name for t in transformations.all_transformations if len(set(t.keywords).intersection(location_to_keyword[location])) > 0]
+    location_to_transf[location] = transf
+    all_keywords = location_to_keyword[location]
+    all_keywords = [k for k in all_keywords if k != 'image' and k != 'pixel']
+    print('Keywords:')
+    print(len(all_keywords))
+    print(all_keywords)
+    print('Transformations:')
+    print(len(transf))
+    print(transf)
+    print('----------------------------------')
+    print('---------------per param-------------------')
+    # also match parameters
+    parameter_keyword = []
+    for param in entries.entries[location]:
+        print(param)
+        
+        stemmed=new_reduce(word_tokenize(param.lower()))
+        #stemmed = {reduce(word) for word in token_words}
+        #print(stemmed)
+        param_keywords = []
+        for w in keywords.keys():
+            for s in keywords[w]:
+                #if w == 'resolution':
+                #    
+                #    print(word_tokenize(s))
+                #    print(set(stemmed) >= set(word_tokenize(s)))
+                if set(stemmed) >= set(word_tokenize(s)):
+                    if len(word_tokenize(s)) > 0:
+                        #print(word_tokenize(s), w)
+                        param_keywords.append(w)
+                        break
+        
+        entries_with_this_param = [e for e in entries.all_entries if e.location == location and e.parameter == param]
+        all_param_keywords = set(sum([e.keywords[0] for e in entries_with_this_param], [])).union(param_keywords)
+        all_param_keywords = [k for k in all_param_keywords if k != 'image' and k != 'pixel']
+        print('Keywords:')
+        print(all_param_keywords)
+        #parameter_keyword.append(param)
+    
+        transf = [t.name for t in transformations.all_transformations if len(set(t.keywords).intersection(location_to_keyword[location])) > 0 and len(set(t.keywords).intersection(all_param_keywords)) > 0]
+        location_to_transf[location] = transf
+        all_keywords = location_to_keyword[location]
+        #print('Keywords:')
+        #print(len(all_keywords))
+        #print(all_keywords)
+        print('Transformations:')
+        print(len(transf))
+        print(transf)
+        print('----------------------------------')
+
+exit()
+
+# match entries with transformations
+for entry in entries.all_entries:    
+    print('---------------' + entry.risk_id +'-----------------')
     entry_keywords_to_transf[entry.risk_id] = {}
     #entry_keywords = ['camera', 'interference', 'noise']#entry.keywords
     #entry_keywords = entries_keyword[entry.risk_id]
@@ -88,12 +185,17 @@ for entry in entries.all_entries:
         entry_keywords_to_transf[entry.risk_id][word] = []
 
     # check for additional transformations that cover more keywords
-    for t in transformations:
+    for t in transformations.all_transformations:
+        #print(t.keywords)
         for word in t.keywords:
+            if word == 'object':
+                continue
             if word in entry_keywords:
                 if t not in entry_keywords_to_transf[entry.risk_id][word]:
                     entry_keywords_to_transf[entry.risk_id][word].append(t.name)
-    continue
+    grouped_results = group_keywords(entry_keywords_to_transf, entry)
+    print(grouped_results)
+
     #nlp = spacy.load("en_core_web_lg")
     #doc = nlp(entry_text)
 
@@ -106,8 +208,8 @@ for entry in entries.all_entries:
 #increase_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('increase')]))
 #decrease_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('decrease')]))
 
-print(entry_keywords_to_transf['1173'])
+
 #print(not_found)
 
-#group_keywords(entry_keywords_to_transf, keywords)
 
+#print(entry_keywords_to_transf)

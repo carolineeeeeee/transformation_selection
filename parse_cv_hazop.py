@@ -1,10 +1,10 @@
-# a collection of cv-hazop entries
-# need to deal with abbreviation
-# need to deal with see
 import pandas as pd
-from nltk import word_tokenize
 from nltk.stem import PorterStemmer
 porter = PorterStemmer()
+from pattern_matching import *
+from utils import *
+import pickle
+import random 
 import re
 
 class CV_HAZOP_entry:
@@ -24,6 +24,8 @@ class CV_HAZOP_entry:
         self.parameter = info_df['Parameter']
         self.matching = []
         self.keywords = []
+        self.found_keywords = {}
+
 
         if not pd.isna(info_df['Meaning']):
             self.meaning= info_df['Meaning']
@@ -52,10 +54,15 @@ class CV_HAZOP_entry:
         return results
     
     def update_abbrv(self, abbrv_dict):
+        #print(self.meaning)
         for k in abbrv_dict:
             self.meaning = (self.meaning.lower()+ ' ').replace(k, abbrv_dict[k])
+            self.meaning = re.sub('\s+', ' ', self.meaning)
             self.consequence = (self.consequence.lower() + ' ').replace(k, abbrv_dict[k])
+            self.consequence = re.sub('\s+', ' ', self.consequence)
             self.risk = (self.risk.lower() + ' ').replace(k, abbrv_dict[k])
+            self.risk = re.sub('\s+', ' ', self.risk)
+        #print(self.meaning)
         return 0
 
 class CV_HAZOP_checklist:
@@ -91,11 +98,15 @@ class CV_HAZOP_checklist:
         self.abbr_replacement['fov.'] = 'field of view' 
         self.abbr_replacement['fov'] = 'field of view'
         self.abbr_replacement['num.'] = 'number'  
-        self.abbr_replacement['/'] = ' or ' 
-        self.abbr_replacement['('] = '' 
-        self.abbr_replacement[')'] = '' 
-        self.abbr_replacement['"'] = '' 
-        self.abbr_replacement['*'] = '' 
+        self.abbr_replacement['dof'] = 'depth of field'  
+        self.abbr_replacement['vorient'] = 'Viewing Orientation'  
+        #self.abbr_replacement['/'] = ' or ' 
+        #self.abbr_replacement['('] = '' 
+        #self.abbr_replacement[')'] = '' 
+        #self.abbr_replacement['"'] = '' 
+        #self.abbr_replacement['*'] = '' 
+        self.abbr_replacement['lgeom'] = 'Lense Geometry' 
+
         df = pd.read_csv(filename)
         for index, row in df.iterrows():
             entry = CV_HAZOP_entry(row)
@@ -206,10 +217,55 @@ class CV_HAZOP_checklist:
             #exit()
         print(set(self.abbr))
     
+    def match_keywords(self, keywords):
+        all_keywords = []
+
+        # only looking at a subset
+        #entries.all_entries = [e for e in entries.all_entries if e.risk_id in ['123', '124', '125', '126', '127', '128']]
+
+        # randomly select a few entries and check 
+        #self.all_entries = [e for e in self.all_entries if e.risk_id == '124' or e.risk_id == '1017']#random.sample(self.all_entries, 1)
+        #entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
+
+        for entry in self.all_entries:
+            #if entry.risk_id != '1017':
+            #    continue
+            entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
+            #if 'see' in entry_text:
+            print('---------------' + entry.risk_id +'-----------------')
+            #print(entry_text)
+            #entry.risk = 'image is blurry and dark'
+            parse_entry(entry)
+            #print(results)
+            print(entry.matching)
+            #print('--------------------------------')
+
+            #if entry.risk.strip() != cur_meaning:
+            #   results = parce(entry)
+            #cur_meaning = entry.risk.strip()
+            #
+            # lemmetize and find keywords
+            entry_keywords, found_keywords = find_keywords(entry.matching, keywords)
+            entry.found_keywords = found_keywords
+            print(entry_keywords)
+            entry.keywords = entry_keywords
+            all_keywords += list(itertools.chain.from_iterable(entry_keywords))
+
+        # TODO: update this to check per location
+        '''
+        to_remove = []
+        for k in set(all_keywords):
+            if len([e for e in self.all_entries if k in list(itertools.chain.from_iterable(e.keywords))]) >= 0.5*len(self.all_entries):
+                to_remove.append(k)
+
+        for e in self.all_entries:
+            new_value = list([list([w for w in l if w not in to_remove and l not in e.location.lower()]) for l in e.keywords])
+            e.keywords = new_value
+        '''
+        self.keywords_with_see()
 
 if __name__ == '__main__':
     entry_file = 'cv_hazop_all.csv'
     cv_hazop = CV_HAZOP_checklist(entry_file)
-    #cv_hazop.print_abbrv()
 
 

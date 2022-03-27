@@ -456,8 +456,8 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 454,Object,Reverse,Texture,Object's texture is inverted,"Object looks like its ""negative""",Object confused or not recognized
 455,Object,Other than,Texture,Object has a completely different texture than expected,Texture is a misleading object property,Object is confused with some other or not recognized at all
 456,Object,Where else,Texture,Textures are located on objects at other places than expected,The parts of object that are expected to be textured are empty and vice versa,Object parts are confused
-457,Object,Spatial periodic,Texture,Obj.texture is periodic,Same appearance of texture on different parts of objects,Object parts are confused
-458,Object,Spatial periodic,Texture,Obj.texture is periodic,If the period undercuts half the resolution of the observer spatial aliasing occurs,Stereo alg.s compute wrong depth maps due to mismatch of texture cells
+457,Object,Spatial periodic,Texture,Obj. texture is periodic,Same appearance of texture on different parts of objects,Object parts are confused
+458,Object,Spatial periodic,Texture,Obj. texture is periodic,If the period undercuts half the resolution of the observer spatial aliasing occurs,Stereo alg.s compute wrong depth maps due to mismatch of texture cells
 459,Object,Spatial aperiodic,Texture,Obj. texture is aperiodic,"Texture does not precisely repeat, but variations are irrelevant",Irregular (stochastic) mismatches in stereo images
 460,Object,Spatial aperiodic,Texture,Obj. texture is aperiodic,"Texture does not precisely repeat, but variations are relevant","Textures are confused, leading to confusion of texture-carrying object( part)s"
 461,Object,Temporal periodic,Texture,Obj. texture changes periodically,"Obj. Texture depends on time of recording, but periodically (and hence predictable)",De-synched scene interpretation causes mismatch of objects in consecutive images 
