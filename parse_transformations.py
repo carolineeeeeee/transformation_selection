@@ -36,36 +36,46 @@ class Transformation:
 
 class TransformationList:
 	"""A class for a library of transformations"""
-	def __init__(self, filename):
+	def __init__(self, filename, lib_name=None):
 		self.filename = filename
 		self.all_transformations = []
+		self.lib_name = lib_name
 		self.parse_transformations(self.filename)
 
 	def parse_transformations(self, filename):
 		transformaton_df = pd.read_csv(filename)
 		for index, row in transformaton_df.iterrows():
-			if row['Source'] == 'albumentations':
+			if self.lib_name:
+				if row['Source'] == self.lib_name:
+					trans_entry = Transformation(index, row)
+					self.all_transformations.append(trans_entry)
+			else:
 				trans_entry = Transformation(index, row)
 				self.all_transformations.append(trans_entry)
 
-	def match_keywords(self, keywords):
+	def match_keywords(self):
 		# match keywords
 		all_keywords = []
 		transformations_keywords = {}
 		#self.all_transformations = [t for t in self.all_transformations if t.index in [1, 2, 3]]
 		for transf in self.all_transformations:
-			#if 'Grid Distortion' not in transf.name:
+			#if 'Crop And Pad' not in transf.name:
+			#	continue
+			#if transf.name != 'Median Blur':
 			#	continue
 			print(transf.name)
-			#print(transf.description)
+			print(transf.description)
 			#print(type(transf.description))
 
 			transformations_keywords[transf.index] = []
 
-			parsed_results = list(set(itertools.chain.from_iterable(parse_transf(transf))))
+			#parsed_results = list(set(itertools.chain.from_iterable(parse_transf(transf))))
+			parsed_results = parse_transf(transf)
 			transf.match = parsed_results
 			print(parsed_results)
-			
+			#continue
+		'''
+		
 			# first find keywords for names
 			t_keywords = find_keywords(parsed_results, keywords, is_transf=True)
 			print(t_keywords)
@@ -88,6 +98,7 @@ class TransformationList:
 		#print(transformations_keywords['Advanced Blur'])
 		#print(transformations_keywords['Random Snow'])
 		#return transformations
+		'''
 	
 	def extract_terms(self):
 		# we should ignore descriptions of the values and examples 

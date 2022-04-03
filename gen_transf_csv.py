@@ -998,10 +998,205 @@ torchvision_affine_parameters['sharpness_factor'] = 'How much to adjust the shar
 torchvision_affine.append(json.dumps(torchvision_affine_parameters))
 Transformations.append(torchvision_affine)
 
+# autocontrast
+torchvision_autocontrast = ['autocontrast', 'torchvision', 'Maximize contrast of an image by remapping its pixels per channel so that the lowest becomes black and the lightest becomes white.']
+torchvision_autocontrast_parameters = {}
+torchvision_autocontrast_parameters['img'] = 'Image on which autocontrast is applied.'
+torchvision_autocontrast.append(json.dumps(torchvision_autocontrast_parameters))
+Transformations.append(torchvision_autocontrast)
 
+# center_crop
+torchvision_center_crop = ['center_crop', 'torchvision', 'Crops the given image at the center.']
+torchvision_center_crop_parameters = {}
+torchvision_center_crop_parameters['img'] = 'Image to be cropped.'
+torchvision_center_crop_parameters['output_size'] = '(height, width) of the crop box. If int or sequence with single int, it is used for both directions.'
+torchvision_center_crop.append(json.dumps(torchvision_center_crop_parameters))
+Transformations.append(torchvision_center_crop)
 
+# convert_image_dtype
+torchvision_convert_image_dtype = ['convert_image_dtype', 'torchvision', 'Convert a tensor image to the given dtype and scale the values accordingly.']
+torchvision_convert_image_dtype_parameters = {}
+torchvision_convert_image_dtype_parameters['img'] = 'Image to be converted'
+torchvision_convert_image_dtype_parameters['dtype'] = 'Desired data type of the output'
+torchvision_convert_image_dtype.append(json.dumps(torchvision_convert_image_dtype_parameters))
+Transformations.append(torchvision_convert_image_dtype)
 
+# crop
+torchvision_crop = ['crop', 'torchvision', 'Crop the given image at specified location and output size.']
+torchvision_crop_parameters = {}
+torchvision_crop_parameters['img'] = 'Image to be cropped. (0,0) denotes the top left corner of the image.'
+torchvision_crop_parameters['top'] = 'Vertical component of the top left corner of the crop box.'
+torchvision_crop_parameters['left'] = 'Horizontal component of the top left corner of the crop box.'
+torchvision_crop_parameters['height'] = 'Height of the crop box.'
+torchvision_crop_parameters['width'] = 'Width of the crop box.'
+torchvision_crop.append(json.dumps(torchvision_crop_parameters))
+Transformations.append(torchvision_crop)
 
+# equalize
+torchvision_equalize = ['equalize', 'torchvision', 'Equalize the histogram of an image by applying a non-linear mapping to the input in order to create a uniform distribution of grayscale values in the output.']
+torchvision_equalize_parameters = {}
+torchvision_equalize_parameters['img'] = 'Image on which equalize is applied.'
+torchvision_equalize.append(json.dumps(torchvision_equalize_parameters))
+Transformations.append(torchvision_equalize)
+
+# erase
+torchvision_erase = ['erase', 'torchvision', 'Erase the input Tensor Image with given value.']
+torchvision_erase_parameters = {}
+torchvision_erase_parameters['img'] = 'Tensor image of size (C, H, W) to be erased'
+torchvision_erase_parameters['i'] = 'i in (i,j) i.e coordinates of the upper left corner.'
+torchvision_erase_parameters['j'] = 'j in (i,j) i.e coordinates of the upper left corner.'
+torchvision_erase_parameters['h'] = 'Height of the erased region.'
+torchvision_erase_parameters['w'] = 'Width of the erased region.'
+torchvision_erase_parameters['v'] = 'Erasing value.'
+torchvision_erase_parameters['inplace'] = 'For in-place operations. By default is set False.'
+torchvision_erase.append(json.dumps(torchvision_erase_parameters))
+Transformations.append(torchvision_erase)
+
+# five_crop
+torchvision_five_crop = ['five_crop', 'torchvision', 'Crop the given image into four corners and the central crop.']
+torchvision_five_crop_parameters = {}
+torchvision_five_crop_parameters['img'] = 'Image to be cropped.'
+torchvision_five_crop_parameters['size'] = ' Desired output size of the crop. If size is an int instead of sequence like (h, w), a square crop (size, size) is made. If provided a sequence of length 1, it will be interpreted as (size[0], size[0]).'
+torchvision_five_crop.append(json.dumps(torchvision_five_crop_parameters))
+Transformations.append(torchvision_five_crop)
+
+# gaussian_blur
+torchvision_gaussian_blur = ['gaussian_blur', 'torchvision', 'Performs Gaussian blurring on the image by given kernel.']
+torchvision_gaussian_blur_parameters = {}
+torchvision_gaussian_blur_parameters['img'] = 'Image to be blurred'
+torchvision_gaussian_blur_parameters['kernel_size'] = ' Gaussian kernel size. Can be a sequence of integers like (kx, ky) or a single integer for square kernels.'
+torchvision_gaussian_blur_parameters['sigma'] = 'Gaussian kernel standard deviation. Can be a sequence of floats like (sigma_x, sigma_y) or a single float to define the same sigma in both X/Y directions. If None, then it is computed using kernel_size as sigma = 0.3 * ((kernel_size - 1) * 0.5 - 1) + 0.8. Default, None.'
+torchvision_gaussian_blur.append(json.dumps(torchvision_gaussian_blur_parameters))
+Transformations.append(torchvision_gaussian_blur)
+
+# hflip
+torchvision_hflip = ['hflip', 'torchvision', 'Horizontally flip the given image.']
+torchvision_hflip_parameters = {}
+torchvision_hflip_parameters['img'] = 'Image to be flipped.'
+torchvision_hflip.append(json.dumps(torchvision_hflip_parameters))
+Transformations.append(torchvision_hflip)
+
+# invert
+torchvision_invert = ['invert', 'torchvision', 'Invert the colors of an RGB/grayscale image.']
+torchvision_invert_parameters = {}
+torchvision_invert_parameters['img'] = 'Image to have its colors inverted.'
+torchvision_invert.append(json.dumps(torchvision_invert_parameters))
+Transformations.append(torchvision_invert)
+
+# normalize
+torchvision_normalize = ['normalize', 'torchvision', 'Normalize a float tensor image with mean and standard deviation.']
+torchvision_normalize_parameters = {}
+torchvision_normalize_parameters['tensor'] = 'Float tensor image of size (C, H, W) or (B, C, H, W) to be normalized.'
+torchvision_normalize_parameters['mean'] = ' Sequence of means for each channel.'
+torchvision_normalize_parameters['std'] = 'Sequence of standard deviations for each channel.'
+torchvision_normalize_parameters['inplace'] = 'Bool to make this operation inplace.'
+torchvision_normalize.append(json.dumps(torchvision_normalize_parameters))
+Transformations.append(torchvision_normalize)
+
+# pad
+torchvision_pad = ['pad', 'torchvision', 'Pad the given image on all sides with the given “pad” value. ']
+torchvision_pad_parameters = {}
+torchvision_pad_parameters['img'] = 'Image to be padded.'
+torchvision_pad_parameters['padding'] = 'Padding on each border. If a single int is provided this is used to pad all borders. If sequence of length 2 is provided this is the padding on left/right and top/bottom respectively. If a sequence of length 4 is provided this is the padding for the left, top, right and bottom borders respectively.'
+torchvision_pad_parameters['fill'] = 'Pixel fill value for constant fill. Default is 0. If a tuple of length 3, it is used to fill R, G, B channels respectively. This value is only used when the padding_mode is constant. Only number is supported for torch Tensor. Only int or str or tuple value is supported for PIL Image.'
+torchvision_pad_parameters['padding_mode'] = 'Type of padding. Should be: constant, edge, reflect or symmetric. Default is constant.'
+torchvision_pad.append(json.dumps(torchvision_pad_parameters))
+Transformations.append(torchvision_pad)
+
+# perspective
+torchvision_perspective = ['perspective', 'torchvision', 'Pad the given image on all sides with the given “pad” value. ']
+torchvision_perspective_parameters = {}
+torchvision_perspective_parameters['img'] = 'Perform perspective transform of the given image. '
+torchvision_perspective_parameters['startpoints'] = 'List containing four lists of two integers corresponding to four corners [top-left, top-right, bottom-right, bottom-left] of the original image'
+torchvision_perspective_parameters['endpoints'] = 'List containing four lists of two integers corresponding to four corners [top-left, top-right, bottom-right, bottom-left] of the transformed image.'
+torchvision_perspective_parameters['interpolation'] = 'Desired interpolation enum defined by torchvision.transforms.InterpolationMode. Default is InterpolationMode.BILINEAR. If input is Tensor, only InterpolationMode.NEAREST, InterpolationMode.BILINEAR are supported. For backward compatibility integer values (e.g. PIL.Image.NEAREST) are still acceptable.'
+torchvision_perspective_parameters['fill'] = 'Pixel fill value for the area outside the transformed image. If given a number, the value is used for all bands respectively.'
+torchvision_perspective.append(json.dumps(torchvision_perspective_parameters))
+Transformations.append(torchvision_perspective)
+
+# posterize
+torchvision_posterize = ['posterize', 'torchvision', 'Posterize an image by reducing the number of bits for each color channel.']
+torchvision_posterize_parameters = {}
+torchvision_posterize_parameters['img'] = ' Image to have its colors posterized'
+torchvision_posterize_parameters['bits'] = 'The number of bits to keep for each channel (0-8)'
+torchvision_posterize.append(json.dumps(torchvision_posterize_parameters))
+Transformations.append(torchvision_posterize)
+
+# resize
+torchvision_resize = ['resize', 'torchvision', 'Resize the input image to the given size. ']
+torchvision_resize_parameters = {}
+torchvision_resize_parameters['img'] = 'Image to be resized.'
+torchvision_resize_parameters['size'] = 'Desired output size.'
+torchvision_resize_parameters['interpolation'] = 'Desired interpolation enum defined by torchvision.transforms.InterpolationMode. Default is InterpolationMode.BILINEAR. If input is Tensor, only InterpolationMode.NEAREST, InterpolationMode.BILINEAR and InterpolationMode.BICUBIC are supported. For backward compatibility integer values (e.g. PIL.Image.NEAREST) are still acceptable.'
+torchvision_resize_parameters['max_size'] = ' The maximum allowed for the longer edge of the resized image: if the longer edge of the image is greater than max_size after being resized according to size, then the image is resized again so that the longer edge is equal to max_size. As a result, size might be overruled, i.e the smaller edge may be shorter than size. This is only supported if size is an int (or a sequence of length 1 in torchscript mode).'
+torchvision_resize_parameters['antialias'] = 'antialias flag. If img is PIL Image, the flag is ignored and anti-alias is always used. If img is Tensor, the flag is False by default and can be set to True for InterpolationMode.BILINEAR only mode. This can help making the output for PIL images and tensors closer.'
+torchvision_resize.append(json.dumps(torchvision_resize_parameters))
+Transformations.append(torchvision_resize)
+
+# resized_crop
+torchvision_resized_crop = ['resized_crop', 'torchvision', 'Crop the given image and resize it to desired size. ']
+torchvision_resized_crop_parameters = {}
+torchvision_resized_crop_parameters['img'] = ' Image to be cropped. (0,0) denotes the top left corner of the image.'
+torchvision_resized_crop_parameters['top'] = 'Vertical component of the top left corner of the crop box.'
+torchvision_resized_crop_parameters['left'] = 'Horizontal component of the top left corner of the crop box.'
+torchvision_resized_crop_parameters['height'] = 'Height of the crop box.'
+torchvision_resized_crop_parameters['width'] = 'Width of the crop box.'
+torchvision_resized_crop_parameters['size'] = 'Desired output size. Same semantics as resize.'
+torchvision_resized_crop_parameters['interpolation'] = 'Desired interpolation enum defined by torchvision.transforms.InterpolationMode. Default is InterpolationMode.BILINEAR. If input is Tensor, only InterpolationMode.NEAREST, InterpolationMode.BILINEAR and InterpolationMode.BICUBIC are supported. For backward compatibility integer values (e.g. PIL.Image.NEAREST) are still acceptable.'
+torchvision_resized_crop.append(json.dumps(torchvision_resized_crop_parameters))
+Transformations.append(torchvision_resized_crop)
+
+# rgb_to_grayscale
+torchvision_rgb_to_grayscale = ['rgb_to_grayscale', 'torchvision', 'Convert RGB image to grayscale version of image. ']
+torchvision_rgb_to_grayscale_parameters = {}
+torchvision_rgb_to_grayscale_parameters['img'] = 'RGB Image to be converted to grayscale.'
+torchvision_rgb_to_grayscale_parameters['num_output_channels'] = 'number of channels of the output image. Value can be 1 or 3. Default, 1.'
+torchvision_rgb_to_grayscale.append(json.dumps(torchvision_rgb_to_grayscale_parameters))
+Transformations.append(torchvision_rgb_to_grayscale)
+
+# rotate
+torchvision_rotate = ['rotate', 'torchvision', 'Rotate the image by angle.']
+torchvision_rotate_parameters = {}
+torchvision_rotate_parameters['img'] = 'image to be rotated.'
+torchvision_rotate_parameters['angle'] = 'rotation angle value in degrees, counter-clockwise.'
+torchvision_rotate_parameters['interpolation'] = 'Desired interpolation enum defined by torchvision.transforms.InterpolationMode. Default is InterpolationMode.NEAREST. If input is Tensor, only InterpolationMode.NEAREST, InterpolationMode.BILINEAR are supported. For backward compatibility integer values (e.g. PIL.Image.NEAREST) are still acceptable.'
+torchvision_rotate_parameters['expand'] = 'Optional expansion flag. If true, expands the output image to make it large enough to hold the entire rotated image. If false or omitted, make the output image the same size as the input image. Note that the expand flag assumes rotation around the center and no translation.'
+torchvision_rotate_parameters['center'] = 'Optional center of rotation. Origin is the upper left corner. Default is the center of the image.'
+torchvision_rotate_parameters['fill'] = 'Pixel fill value for the area outside the transformed image. If given a number, the value is used for all bands respectively.'
+torchvision_rotate.append(json.dumps(torchvision_rotate_parameters))
+Transformations.append(torchvision_rotate)
+
+# solarize
+torchvision_solarize = ['solarize', 'torchvision', 'Solarize an RGB/grayscale image by inverting all pixel values above a threshold.']
+torchvision_solarize_parameters = {}
+torchvision_solarize_parameters['img'] = ' Image to have its colors inverted.'
+torchvision_solarize_parameters['threshold'] = 'All pixels equal or above this value are inverted.'
+torchvision_solarize.append(json.dumps(torchvision_solarize_parameters))
+Transformations.append(torchvision_solarize)
+
+# ten_crop
+torchvision_ten_crop = ['ten_crop', 'torchvision', 'Generate ten cropped images from the given image. Crop the given image into four corners and the central crop plus the flipped version of these (horizontal flipping is used by default). ']
+torchvision_ten_crop_parameters = {}
+torchvision_ten_crop_parameters['img'] = 'Image to be cropped.'
+torchvision_ten_crop_parameters['size'] = ' Desired output size of the crop. If size is an int instead of sequence like (h, w), a square crop (size, size) is made. If provided a sequence of length 1, it will be interpreted as (size[0], size[0]).'
+torchvision_ten_crop_parameters['vertical_flip'] = 'Use vertical flipping instead of horizontal'
+torchvision_ten_crop.append(json.dumps(torchvision_ten_crop_parameters))
+Transformations.append(torchvision_ten_crop)
+
+# to_grayscale
+torchvision_ten_crop = ['to_grayscale', 'torchvision', 'Convert PIL image of any mode (RGB, HSV, LAB, etc) to grayscale version of image.']
+torchvision_ten_crop_parameters = {}
+torchvision_ten_crop_parameters['img'] = 'PIL Image to be converted to grayscale'
+torchvision_ten_crop_parameters['num_output_channels'] = 'number of channels of the output image. Value can be 1 or 3. Default is 1.'
+torchvision_ten_crop.append(json.dumps(torchvision_ten_crop_parameters))
+Transformations.append(torchvision_ten_crop)
+
+# vflip
+torchvision_vflip = ['vflip', 'torchvision', 'Vertically flip the given image.']
+torchvision_vflip_parameters = {}
+torchvision_vflip_parameters['img'] = 'Image to be flipped.'
+torchvision_vflip.append(json.dumps(torchvision_vflip_parameters))
+Transformations.append(torchvision_vflip)
 
 
 transfs = pd.DataFrame(Transformations, columns=col_names)

@@ -130,7 +130,7 @@ class CV_HAZOP_checklist:
             self.entries[entry.location][entry.parameter][entry.guide_word].append(entry)
             self.all_entries.append(entry)
 
-    def keywords_with_see(self):
+    def matching_with_see(self):
         list_locations = set([e.location for e in self.all_entries])
         list_parameters = set([e.parameter for e in self.all_entries])
         list_guidewords  = {'No':'No (not none)', 'More':'More (more of, higher)', 'Less':'Less (less of, lower)', 
@@ -143,9 +143,9 @@ class CV_HAZOP_checklist:
                 continue
             for text, index in [(e.meaning.lower(), 0), (e.consequence.lower(), 1), (e.risk.lower(), 2)]:
                 if 'see' in text.split():
-                    if len(text.split()) > 5:
-                        print(e.risk_id)
-                        print(text)
+                    #if len(text.split()) > 5:
+                    #    print(e.risk_id)
+                    #    print(text)
                     title = [list_title[t] for t in list_title if t  in text ]     
                        
                     location = [l for l in list_locations if  l.lower() in  text ]
@@ -182,11 +182,11 @@ class CV_HAZOP_checklist:
                                         if number == []:
                                             for c_e in corresponding_entry:
                                                 #if len(c_e.keywords) > t:
-                                                e.keywords[t] += c_e.keywords[t]
+                                                e.matching[t] += c_e.matching[t]
                                                     #e.keywords.append(c_e.keywords[t])
                                         else:
                                             #if len(corresponding_entry[number[0]].keywords) > t:
-                                            e.keywords.append(corresponding_entry[number[0]].keywords[t])
+                                            e.matching.append(corresponding_entry[number[0]].matching[t])
                                     except:
                                         continue
 
@@ -217,7 +217,7 @@ class CV_HAZOP_checklist:
             #exit()
         print(set(self.abbr))
     
-    def match_keywords(self, keywords):
+    def match_keywords(self):
         all_keywords = []
 
         # only looking at a subset
@@ -228,16 +228,19 @@ class CV_HAZOP_checklist:
         #entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
 
         for entry in self.all_entries:
-            #if entry.risk_id != '1017':
+            #if entry.risk_id != '1159':
             #    continue
             entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
             #if 'see' in entry_text:
             print('---------------' + entry.risk_id +'-----------------')
-            #print(entry_text)
+            print(entry_text)
             #entry.risk = 'image is blurry and dark'
             parse_entry(entry)
             #print(results)
             print(entry.matching)
+            #exit()
+            continue
+
             #print('--------------------------------')
 
             #if entry.risk.strip() != cur_meaning:
@@ -245,11 +248,11 @@ class CV_HAZOP_checklist:
             #cur_meaning = entry.risk.strip()
             #
             # lemmetize and find keywords
-            entry_keywords, found_keywords = find_keywords(entry.matching, keywords)
-            entry.found_keywords = found_keywords
-            print(entry_keywords)
-            entry.keywords = entry_keywords
-            all_keywords += list(itertools.chain.from_iterable(entry_keywords))
+            #entry_keywords, found_keywords = find_keywords(entry.matching, keywords)
+            #entry.found_keywords = found_keywords
+            #print(entry_keywords)
+            #entry.keywords = entry_keywords
+            #all_keywords += list(itertools.chain.from_iterable(entry_keywords))
 
         # TODO: update this to check per location
         '''
@@ -262,7 +265,7 @@ class CV_HAZOP_checklist:
             new_value = list([list([w for w in l if w not in to_remove and l not in e.location.lower()]) for l in e.keywords])
             e.keywords = new_value
         '''
-        self.keywords_with_see()
+        self.matching_with_see()
 
 if __name__ == '__main__':
     entry_file = 'cv_hazop_all.csv'

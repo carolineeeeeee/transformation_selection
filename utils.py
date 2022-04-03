@@ -208,4 +208,3 @@ def check_parcing(text):
                 token.shape_, token.is_alpha, token.is_stop)
     for np in doc.noun_chunks:
         print(np.text)
-

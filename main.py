@@ -5,6 +5,7 @@ from pattern_matching import *
 import random
 import pickle
 import os
+import numpy as np
 #print(reduce('median filter'))
 #print(reduce('filter'))
 #print(reduce('blurry image'))
@@ -16,13 +17,63 @@ from sklearn.metrics.pairwise import cosine_similarity
 # manually checking the similairty approach
 entry_keywords_to_transf = {}
 
-glossary_file = 'image_processing_terms.txt' #'image_processing_glossary.txt'
-keywords = load_keywords(glossary_file)
 
+#1. order of words matter a little bit: illumination change VS change brightness -> 0.51,  change illumination VS change brightness -> 0.47. If i use another model that doesn't care about this, the other model struggles with too much light VS change brightness (one way to do this is take max of two models, it's a bit weird)
+#2. what to do with single nouns? those create a lot of false positives, for example, pixel
+
+BERT_model = SentenceTransformer('all-distilroberta-v1') # TODO: this one or the other one?
+BERT_model_2 = SentenceTransformer('all-mpnet-base-v2') # TODO: this one or the other one?
 
 '''
 
-model = SentenceTransformer('bert-base-nli-mean-tokens')
+print('from model 1:')
+
+sim_arr=cosine_similarity(
+            [BERT_model.encode('too faint light')],
+            [BERT_model.encode('change brightness')]
+        )
+print('too faint light VS change brightness: ' + str(sim_arr))
+sim_arr=cosine_similarity(
+            [BERT_model.encode('too much light')],
+            [BERT_model.encode('change brightness')]
+        )
+print('too much light VS change brightness: ' + str(sim_arr))
+sim_arr=cosine_similarity(
+            [BERT_model.encode('illumination change')],
+            [BERT_model.encode('change brightness')]
+        )
+print('illumination change VS change brightness: ' + str(sim_arr))
+sim_arr=cosine_similarity(
+            [BERT_model.encode('change illumination')],
+            [BERT_model.encode('change brightness')]
+        )
+print('change illumination VS change brightness: ' + str(sim_arr))
+
+# illumination change will not  match with change brightness but change illumination will
+BERT_model_2 = SentenceTransformer('all-mpnet-base-v2') # TODO: this one or the other one?
+
+print('from model 2:')
+sim_arr=cosine_similarity(
+            [BERT_model_2.encode('too faint light')],
+            [BERT_model_2.encode('change brightness')]
+        )
+print('too faint light VS change brightness: ' + str(sim_arr))
+sim_arr=cosine_similarity(
+            [BERT_model_2.encode('too much light')],
+            [BERT_model_2.encode('change brightness')]
+        )
+print('too much light VS change brightness: ' + str(sim_arr))
+sim_arr=cosine_similarity(
+            [BERT_model_2.encode('illumination change')],
+            [BERT_model_2.encode('change brightness')]
+        )
+print('illumination change VS change brightness: ' + str(sim_arr))
+sim_arr=cosine_similarity(
+            [BERT_model_2.encode('change illumination')],
+            [BERT_model_2.encode('change brightness')]
+        )
+print('change illumination VS change brightness: ' + str(sim_arr))
+
 
 entry_1159_match = ['Larger pixel size', 'lower noise level', 'less resolution of observer']
 superpixel_match = ['Transform image to their superpixel representation', 'replace pixel within segment by their average color']
@@ -44,172 +95,83 @@ for e_match in entry_1159_match:
             print('----------------')
 exit()
 
-
-
-if os.path.isfile('albumentation.pickle'):
-    with open('albumentation.pickle', 'rb') as handle:
-        transformations = pickle.load(handle)
-else:
-    transformations = TransformationList('transformations.csv')
-    transformations.match_keywords(keywords)
-    with open('albumentation.pickle', 'wb') as handle:
-        pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-for t in transformations.all_transformations:
-    if 'ISO Noise' in t.name:
-        print(t.name)
-        print(t.match)
-        print('------------')
-exit()
 '''
-entry_file = 'exp_entries'#'cv_hazop_all.csv'#'cv_hazop_light_sources.csv'
-
-#if os.path.isfile(entry_file + '.pickle'):
-#    with open(entry_file+'.pickle', 'rb') as handle:
-#        entries = pickle.load(handle)
-#else:
-entries = CV_HAZOP_checklist(entry_file+'.csv')
-entries.match_keywords(keywords)
-with open(entry_file+'.pickle', 'wb') as handle:
-    pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-exit()
-
-location_to_keyword = {}
-unions = set()
-for location in entries.entries:
-    #print(location)
-    entries_at_this_loc = [e for e in entries.all_entries if e.location == location]
-    all_keywords = set(sum([e.keywords[0] for e in entries_at_this_loc], []))
-    if len(unions) > 0:
-        unions = unions.intersection(all_keywords)
+def match(library_name, entry_file):
+    if os.path.isfile(library_name + '.pickle'):
+        with open(library_name+'.pickle', 'rb') as handle:
+            transformations = pickle.load(handle)
     else:
-        union = all_keywords
-    #print(len(all_keywords))
-    #print(all_keywords)
+        transformations = TransformationList('transformations.csv')
+        transformations.match_keywords()
+        with open(library_name+'.pickle', 'wb') as handle:
+            pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    location_to_keyword[location] = all_keywords
-    #print('----------------------------------')
+    #entry_file = 'cv_hazop_all'#'cv_hazop_all.csv'#'cv_hazop_light_sources.csv'
+    if os.path.isfile(entry_file + '.pickle'):
+        with open(entry_file+'.pickle', 'rb') as handle:
+            entries = pickle.load(handle)
+    else:
+        entries = CV_HAZOP_checklist(entry_file+'.csv')
+        entries.match_keywords()
+        with open(entry_file+'.pickle', 'wb') as handle:
+            pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-#print(len(unions))
-#print(unions)
-'''
-for t in transformations.all_transformations:
-    print(t.name)
-    print(t.keywords)
-    print('-------------------------')
+    #exp_entries_id = ['3', '86', '124', '141', '199', '200', '204', '211', '296', '371', '421', '478', '537', '611', '651', '827', '869', '910', '1017', '1120', '1159']
+    #exp_entries_id = ['1159']
+    exp_entries = entries.all_entries #random.sample(entries.all_entries, 20)#[e for e in entries.all_entries if e.risk_id in exp_entries_id]
+
+    # TODO: merge scene, view, image, object
+    # synonym of image
+    #print(list(set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('image')]))))
 
 
-# trying unique keywords
-for location1 in location_to_keyword:
-    print(location1)
-    print('old len: ' + str(len(location_to_keyword[location1])))
-    for location2 in location_to_keyword:
-        if location1 != location2:
-            intersect12 = location_to_keyword[location1].intersection(location_to_keyword[location2])
-            location_to_keyword[location1] = location_to_keyword[location1] - intersect12
-    print('new len: ' + str(len(location_to_keyword[location1])))
-    print(location_to_keyword[location1])
-    print('---------------')
-
-exit()
-'''
-location_to_transf = {}
-for location in location_to_keyword:
-    print(location)
-    print('----------------------------------')
-    print('----------------------------------')
-    transf = [t.name for t in transformations.all_transformations if len(set(t.keywords).intersection(location_to_keyword[location])) > 0]
-    location_to_transf[location] = transf
-    all_keywords = location_to_keyword[location]
-    all_keywords = [k for k in all_keywords if k != 'image' and k != 'pixel']
-    print('Keywords:')
-    print(len(all_keywords))
-    print(all_keywords)
-    print('Transformations:')
-    print(len(transf))
-    print(transf)
-    print('----------------------------------')
-    print('---------------per param-------------------')
-    # also match parameters
-    parameter_keyword = []
-    for param in entries.entries[location]:
-        print(param)
-        
-        stemmed=new_reduce(word_tokenize(param.lower()))
-        #stemmed = {reduce(word) for word in token_words}
-        #print(stemmed)
-        param_keywords = []
-        for w in keywords.keys():
-            for s in keywords[w]:
-                #if w == 'resolution':
-                #    
-                #    print(word_tokenize(s))
-                #    print(set(stemmed) >= set(word_tokenize(s)))
-                if set(stemmed) >= set(word_tokenize(s)):
-                    if len(word_tokenize(s)) > 0:
-                        #print(word_tokenize(s), w)
-                        param_keywords.append(w)
-                        break
-        
-        entries_with_this_param = [e for e in entries.all_entries if e.location == location and e.parameter == param]
-        all_param_keywords = set(sum([e.keywords[0] for e in entries_with_this_param], [])).union(param_keywords)
-        all_param_keywords = [k for k in all_param_keywords if k != 'image' and k != 'pixel']
-        print('Keywords:')
-        print(all_param_keywords)
-        #parameter_keyword.append(param)
-    
-        transf = [t.name for t in transformations.all_transformations if len(set(t.keywords).intersection(location_to_keyword[location])) > 0 and len(set(t.keywords).intersection(all_param_keywords)) > 0]
-        location_to_transf[location] = transf
-        all_keywords = location_to_keyword[location]
-        #print('Keywords:')
-        #print(len(all_keywords))
-        #print(all_keywords)
-        print('Transformations:')
-        print(len(transf))
-        print(transf)
-        print('----------------------------------')
-
-exit()
-
-# match entries with transformations
-for entry in entries.all_entries:    
-    print('---------------' + entry.risk_id +'-----------------')
-    entry_keywords_to_transf[entry.risk_id] = {}
-    #entry_keywords = ['camera', 'interference', 'noise']#entry.keywords
-    #entry_keywords = entries_keyword[entry.risk_id]
-    entry_keywords = list(set(itertools.chain.from_iterable(entry.keywords)))
-    if len(entry_keywords) == 0:
-        continue
-    for word in entry_keywords:
-        entry_keywords_to_transf[entry.risk_id][word] = []
-
-    # check for additional transformations that cover more keywords
-    for t in transformations.all_transformations:
-        #print(t.keywords)
-        for word in t.keywords:
-            if word == 'object':
+    # matching
+    similarity_threshold = 0.5
+    match_results = {}
+    for e in exp_entries:
+        print(e.risk_id)
+        #if e.risk_id != '1017':
+        #    continue
+        match_results[e.risk_id] = {}
+        e_text = list(itertools.chain.from_iterable(e.matching))
+        print(e_text)
+        sentence_embeddings1 = BERT_model.encode(e_text)
+        sentence_embeddings1_2 = BERT_model_2.encode(e_text)
+        #print(sentence_embeddings1.shape)
+        for t in transformations.all_transformations:
+            #print(t.name)
+            #print(t.match)
+            if t.match == []:
                 continue
-            if word in entry_keywords:
-                if t not in entry_keywords_to_transf[entry.risk_id][word]:
-                    entry_keywords_to_transf[entry.risk_id][word].append(t.name)
-    grouped_results = group_keywords(entry_keywords_to_transf, entry)
-    print(grouped_results)
+            sentence_embeddings2 = BERT_model.encode(t.match)
+            sentence_embeddings2_2 = BERT_model_2.encode(t.match)
+            #print(sentence_embeddings2.shape)
+            sim_arr_1=cosine_similarity(
+                sentence_embeddings1,
+                sentence_embeddings2
+            )
+            sim_arr_2=cosine_similarity(
+                sentence_embeddings1_2,
+                sentence_embeddings2_2
+            )
+            sim_arr = np.maximum(sim_arr_1, sim_arr_2)
+            #if 'Blur' in t.name:
+            #    print(t.name)
+            #    print(t.match)
+            #print(sim_arr)
+            matched = np.argwhere(sim_arr >= similarity_threshold)
+            for pair in matched:
+                if e_text[pair[0]] not in match_results[e.risk_id]:
+                    match_results[e.risk_id][e_text[pair[0]]] = []
+                match_results[e.risk_id][e_text[pair[0]]].append((t.name, t.match[pair[1]]))
+            #exit()
+        print(match_results[e.risk_id])
+    return match_results, entries, transformations
 
-    #nlp = spacy.load("en_core_web_lg")
-    #doc = nlp(entry_text)
+def evaluation(library_name):
+    match_results, entries, transformations = match(library_name, 'cv_hazop_all')
 
-    #for token in doc:
-    #    print(token.text, token.lemma_, token.pos_, token.tag_, token.dep_,
-    #            token.shape_, token.is_alpha, token.is_stop)
-    #for np in doc.noun_chunks:
-    #    print(np.text)
-#patterns = [('increase', NP), ('decrease', NP), ('too', ADJ)]
-#increase_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('increase')]))
-#decrease_words = set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('decrease')]))
+    # bar chart for how many are in each
+    
 
-
-#print(not_found)
-
-
-#print(entry_keywords_to_transf)
+    # pie chart for the one most covered, which parameter
