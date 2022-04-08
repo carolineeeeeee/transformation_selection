@@ -3,10 +3,10 @@ from utils import *
 import pandas as pd
 import json
 from pattern_matching import *
-import itertools
-import math 
-from nltk.corpus import stopwords
-import yake
+#import itertools
+#import math 
+#from nltk.corpus import stopwords
+#import yake
 
 
 class Transformation:

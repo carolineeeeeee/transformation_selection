@@ -1,15 +1,14 @@
-from curses.ascii import NL
-from turtle import pos
-from nltk import word_tokenize
-import spacy
-import itertools
+#from curses.ascii import NL
+#from turtle import pos
+#from nltk import word_tokenize
+#import spacy
+#import itertools
 from nltk.corpus import wordnet as wn
 import re
 import stanza
 
 #nlp_c = stanza.Pipeline('en', processors='tokenize,pos,constituency') # initialize English neural pipeline
 nlp_d = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma,depparse')
-
 
 modifiers = ['nmod', 'amod', 'advmod', 'appos', 'advcl', 'compound']
 

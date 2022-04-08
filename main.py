@@ -6,6 +6,8 @@ import random
 import pickle
 import os
 import numpy as np
+import matplotlib.pyplot as plt
+
 #print(reduce('median filter'))
 #print(reduce('filter'))
 #print(reduce('blurry image'))
@@ -124,7 +126,6 @@ def match(library_name, entry_file):
     # synonym of image
     #print(list(set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('image')]))))
 
-
     # matching
     similarity_threshold = 0.5
     match_results = {}
@@ -166,12 +167,93 @@ def match(library_name, entry_file):
                 match_results[e.risk_id][e_text[pair[0]]].append((t.name, t.match[pair[1]]))
             #exit()
         print(match_results[e.risk_id])
+    with open(library_name + '_eval.pickle', 'wb') as handle:
+        pickle.dump((match_results, entries, transformations), handle, protocol=pickle.HIGHEST_PROTOCOL)
     return match_results, entries, transformations
 
 def evaluation(library_name):
-    match_results, entries, transformations = match(library_name, 'cv_hazop_all')
-
+    print(library_name)
+    if os.path.isfile(library_name + '_eval.pickle'):
+        with open(library_name + '_eval.pickle', 'rb') as handle:
+            match_results, entries, transformations = pickle.load(handle)
+    else:
+        print('nothing')
+        #match_results, entries, transformations = match(library_name, 'cv_hazop_all')
+    print(len(match_results.keys()))
     # bar chart for how many are in each
+    locations = []
+    matched_counts = []
+    all_covered_counts = []
+    for loc in entries.entries:
+        print(loc)
+        locations.append(loc)
+        #matched_count = 0
+        entries_at_loc = [x for x in entries.all_entries if x.location == loc]
+        #print(len(entries_at_loc))
+        matched_count = len([x for x in entries_at_loc if match_results[x.risk_id] != {}])
+        print('some covered: ' + str(matched_count) + '/' + str(len(entries_at_loc)))
+        matched_counts.append(matched_count/len(entries_at_loc))
+
+        all_covered = len([x for x in entries_at_loc if len(match_results[x.risk_id]) == len(sum(x.matching[:-1], []))])
+        print('all covered: ' + str(all_covered) + '/' + str(len(entries_at_loc)))
+        all_covered_counts.append(all_covered/len(entries_at_loc))
+
+
+    # set width of bar
+    barWidth = 0.25
+    fig = plt.subplots(figsize =(12, 8))
+
+    # Set position of bar on X axis
+    br1 = np.arange(len(all_covered_counts))
+    br2 = [x + barWidth for x in br1]
+    #br3 = [x + barWidth for x in br2]
     
+    # Make the plot
+    plt.bar(br1, matched_counts, color ='b', width = barWidth,
+            edgecolor ='grey', label ='matched')
+    plt.bar(br2, all_covered_counts, color ='g', width = barWidth,
+            edgecolor ='grey', label ='all matched')
+    #plt.bar(br3, CSE, color ='b', width = barWidth,
+    #        edgecolor ='grey', label ='CSE')
+    
+    # Adding Xticks
+    plt.xlabel('Location', fontweight ='bold', fontsize = 15)
+    plt.ylabel('Percentage of entries', fontweight ='bold', fontsize = 15)
+    plt.xticks([r + barWidth for r in range(len(locations))],
+            locations)
+    
+    plt.legend()
+    plt.show()
+
 
     # pie chart for the one most covered, which parameter
+    loc = 'Object'
+    params = []
+    matched_counts = []
+    all_covered_counts = []
+
+    for param in entries.entries[loc]:
+        params.append(param)
+        entries_at_param = [x for x in entries.all_entries if x.location == loc and x.parameter == param]
+        #print(len(entries_at_loc))
+        matched_count = len([x for x in entries_at_param if match_results[x.risk_id] != {}])
+        print('some covered: ' + str(matched_count) + '/' + str(len(entries_at_param)))
+        matched_counts.append(matched_count/len(entries_at_param))
+
+        all_covered = len([x for x in entries_at_param if len(match_results[x.risk_id]) == len(sum(x.matching[:-1], []))])
+        print('all covered: ' + str(all_covered) + '/' + str(len(entries_at_param)))
+        all_covered_counts.append(all_covered/len(entries_at_param))
+
+    y = np.array(matched_counts)
+    plt.pie(y, labels=params, autopct=lambda p: '{:.0f}%'.format(p), shadow=True)
+    plt.title('some matched for object')
+    plt.show() 
+
+    y = np.array(all_covered_counts)
+    plt.pie(y, labels=params, autopct=lambda p: '{:.0f}%'.format(p ), shadow=True)
+    plt.title('all matched for object')
+    plt.show() 
+
+if __name__ == '__main__':
+    #evaluation('albumentations')
+    evaluation('torchvision')

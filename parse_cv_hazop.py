@@ -3,8 +3,8 @@ from nltk.stem import PorterStemmer
 porter = PorterStemmer()
 from pattern_matching import *
 from utils import *
-import pickle
-import random 
+#import pickle
+#import random 
 import re
 
 class CV_HAZOP_entry:
