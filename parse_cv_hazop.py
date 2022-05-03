@@ -3,9 +3,10 @@ from nltk.stem import PorterStemmer
 porter = PorterStemmer()
 from pattern_matching import *
 from utils import *
-#import pickle
+import pickle
 #import random 
 import re
+import os
 
 class CV_HAZOP_entry:
     """A class for transformation information"""
@@ -24,6 +25,7 @@ class CV_HAZOP_entry:
         self.parameter = info_df['Parameter']
         self.matching = []
         self.keywords = []
+        self.prop = []
         self.found_keywords = {}
 
 
@@ -86,6 +88,7 @@ class CV_HAZOP_checklist:
         self.abbr_replacement['calib.'] = 'calibration'
         self.abbr_replacement['alg.'] = 'algorithm'
         self.abbr_replacement['obj.'] = 'object'
+        self.abbr_replacement['objs.'] = 'object'
         self.abbr_replacement['obs.'] = 'observer'
         self.abbr_replacement['spat.'] = 'spatial'
         self.abbr_replacement['orient.'] = 'orientation'
@@ -100,6 +103,8 @@ class CV_HAZOP_checklist:
         self.abbr_replacement['num.'] = 'number'  
         self.abbr_replacement['dof'] = 'depth of field'  
         self.abbr_replacement['vorient'] = 'Viewing Orientation'  
+        self.abbr_replacement['Num'] = 'Number'  
+        
         #self.abbr_replacement['/'] = ' or ' 
         #self.abbr_replacement['('] = '' 
         #self.abbr_replacement[')'] = '' 
@@ -110,16 +115,21 @@ class CV_HAZOP_checklist:
         df = pd.read_csv(filename)
         for index, row in df.iterrows():
             entry = CV_HAZOP_entry(row)
-
             # keep only image related entries
+            
             if 'Algorithm' in entry.location:
                 continue
             param_to_remove = ['Temporal periodic', 'Temporal aperiodic', 'Before', 'After', 'Faster', 'Slower', 'Early', 'Late']
-            if entry.parameter in param_to_remove:
-                continue
+            if entry.guide_word in param_to_remove:
+                entry_text = entry.meaning + ' ' + entry.consequence + ' ' + entry.risk
+                if 'motion' not in entry_text.lower() or 'blur' not in entry_text.lower():
+                    continue
             if 'Observer' in entry.location and entry.parameter == 'Number':
                 continue
-            
+            if 'MISSING' in entry.meaning or 'n/a' in entry.meaning or entry.meaning == '':
+                continue
+            if entry.consequence == '' and entry.risk == '':
+                continue
             if entry.location not in self.entries:
                 self.entries[entry.location] = {}
             if entry.parameter not in self.entries[entry.location]:
@@ -139,27 +149,39 @@ class CV_HAZOP_checklist:
         'Spatial aperiodic':'Spatial aperiodic', 'Close':'Close', 'Remote':'Remote', 'In front of':'In front of', 'Behind':'Behind'}
         list_title = {'meaning':0, 'consequence':1, 'risk':2}
         for e in self.all_entries:
+            #if e.risk_id not in ['554']:#, '213', '554']:
+            #    continue
+            #print(e.risk_id)
             if e.risk_id in ['1002', '817']:
                 continue
             for text, index in [(e.meaning.lower(), 0), (e.consequence.lower(), 1), (e.risk.lower(), 2)]:
                 if 'see' in text.split():
+                    #print(text)
                     #if len(text.split()) > 5:
                     #    print(e.risk_id)
                     #    print(text)
                     title = [list_title[t] for t in list_title if t  in text ]     
+                    #print(title)
                        
                     location = [l for l in list_locations if  l.lower() in  text ]
                     
                     parameter = [p for p in list_parameters if p.lower() in   text ]
                     
                     guideword = [g for g in list_guidewords if g.lower() in  text ]
+                    #print(guideword)
                     if 'other than expected' in text:
                         guideword.remove('Other than')
 
-                    if len(text.split()) > 5:
-                        print(title, location, parameter, guideword)
+                    #if len(text.split()) > 5:
+                    #    print(title, location, parameter, guideword)
+                        #exit()
                     if title == [] and location == [] and parameter == [] and guideword == []:
                         continue
+
+                    if location == [] and parameter == [] and guideword == [] and title != []:
+                        itself=True
+                    else:
+                        itself = False
 
                     if title == []:
                         title.append(index)     
@@ -176,17 +198,26 @@ class CV_HAZOP_checklist:
                                 for t in title:
                                     #print(l,p,g, t)
                                     try:
-                                        corresponding_entry = self.entries[l][p][list_guidewords[g]]
+                                        if itself:
+                                            corresponding_entry = [e]
+                                        else:
+                                            corresponding_entry = self.entries[l][p][list_guidewords[g]]
+                                        #print(corresponding_entry)
                                         # if a number is specified
-                                        number = [int(i) for i in text if i.isdigit()]
+                                        number = [int(i)-1 for i in text if i.isdigit()]# minus one for index
                                         if number == []:
                                             for c_e in corresponding_entry:
                                                 #if len(c_e.keywords) > t:
-                                                e.matching[t] += c_e.matching[t]
+                                                e.matching[index] += c_e.matching[t]
+                                            e.matching[index] = list(set(e.matching[index]))
+                                            #print(e.matching)
                                                     #e.keywords.append(c_e.keywords[t])
                                         else:
                                             #if len(corresponding_entry[number[0]].keywords) > t:
+                                            #print(corresponding_entry[number[0]].risk_id)
                                             e.matching.append(corresponding_entry[number[0]].matching[t])
+                                            #print(e.matching)
+
                                     except:
                                         continue
 
@@ -218,28 +249,36 @@ class CV_HAZOP_checklist:
         print(set(self.abbr))
     
     def match_keywords(self):
+        #print('match keywords')
         all_keywords = []
+        if os.path.isfile('inter.pickle'):
+            with open('inter.pickle', 'rb') as handle:
+                self = pickle.load(handle)
+        else:
+            # only looking at a subset
+            #entries.all_entries = [e for e in entries.all_entries if e.risk_id in ['123', '124', '125', '126', '127', '128']]
 
-        # only looking at a subset
-        #entries.all_entries = [e for e in entries.all_entries if e.risk_id in ['123', '124', '125', '126', '127', '128']]
+            # randomly select a few entries and check 
+            #self.all_entries = [e for e in self.all_entries if e.risk_id == '124' or e.risk_id == '1017']#random.sample(self.all_entries, 1)
+            #entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
 
-        # randomly select a few entries and check 
-        #self.all_entries = [e for e in self.all_entries if e.risk_id == '124' or e.risk_id == '1017']#random.sample(self.all_entries, 1)
-        #entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
-
-        for entry in self.all_entries:
-            #if entry.risk_id != '1159':
-            #    continue
-            entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
-            #if 'see' in entry_text:
-            print('---------------' + entry.risk_id +'-----------------')
-            print(entry_text)
-            #entry.risk = 'image is blurry and dark'
-            parse_entry(entry)
-            #print(results)
-            print(entry.matching)
-            #exit()
-            continue
+            for entry in self.all_entries:
+                if entry.risk_id not in ['651', '1017']:#, '603', '602']:
+                    continue
+                entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
+                #if 'see' in entry_text:
+                print('---------------' + entry.risk_id +'-----------------')
+                print(entry_text)
+                #entry.risk = 'image is blurry and dark'
+                parse_entry(entry)
+                #print(results)
+                print(entry.matching)
+                #exit()
+                #continue
+            #with open('inter.pickle', 'wb') as handle:
+            #    pickle.dump(self, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        self.matching_with_see()
+        #exit()
 
             #print('--------------------------------')
 
@@ -265,7 +304,8 @@ class CV_HAZOP_checklist:
             new_value = list([list([w for w in l if w not in to_remove and l not in e.location.lower()]) for l in e.keywords])
             e.keywords = new_value
         '''
-        self.matching_with_see()
+
+            
 
 if __name__ == '__main__':
     entry_file = 'cv_hazop_all.csv'

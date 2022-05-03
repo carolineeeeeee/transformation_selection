@@ -98,8 +98,7 @@ class TransformationList:
 		#print(transformations_keywords['Advanced Blur'])
 		#print(transformations_keywords['Random Snow'])
 		#return transformations
-		'''
-	
+		
 	def extract_terms(self):
 		# we should ignore descriptions of the values and examples 
 		# description of the values should be used to determine the guideword
@@ -120,3 +119,5 @@ class TransformationList:
 				print("Keyphrase: ",kw, ": score", v)
 			print('--------------------------------------------')
 		#return 0
+		'''
+	

@@ -1,11 +1,8 @@
-from http.client import FOUND
-from matplotlib.pyplot import xlabel
 from nltk import word_tokenize
 import spacy
 import itertools
 from nltk.corpus import wordnet as wn
 import re
-import textacy
 from nltk.stem import PorterStemmer, WordNetLemmatizer, LancasterStemmer
 porter = PorterStemmer()
 wordnet_lemmatizer = WordNetLemmatizer()

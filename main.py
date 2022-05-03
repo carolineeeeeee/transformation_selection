@@ -26,15 +26,23 @@ entry_keywords_to_transf = {}
 BERT_model = SentenceTransformer('all-distilroberta-v1') # TODO: this one or the other one?
 BERT_model_2 = SentenceTransformer('all-mpnet-base-v2') # TODO: this one or the other one?
 
-'''
 
+'''
 print('from model 1:')
 
 sim_arr=cosine_similarity(
-            [BERT_model.encode('too faint light')],
+            [BERT_model.encode('dark scene')],
             [BERT_model.encode('change brightness')]
         )
 print('too faint light VS change brightness: ' + str(sim_arr))
+
+print('from model 2:')
+sim_arr=cosine_similarity(
+            [BERT_model_2.encode('dark scene')],
+            [BERT_model_2.encode('change brightness')]
+        )
+print('too faint light VS change brightness: ' + str(sim_arr))
+
 sim_arr=cosine_similarity(
             [BERT_model.encode('too much light')],
             [BERT_model.encode('change brightness')]
@@ -103,34 +111,45 @@ def match(library_name, entry_file):
         with open(library_name+'.pickle', 'rb') as handle:
             transformations = pickle.load(handle)
     else:
-        transformations = TransformationList('transformations.csv')
+        transformations = TransformationList('transformations.csv', lib_name=library_name)
         transformations.match_keywords()
         with open(library_name+'.pickle', 'wb') as handle:
             pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    #entry_file = 'cv_hazop_all'#'cv_hazop_all.csv'#'cv_hazop_light_sources.csv'
-    if os.path.isfile(entry_file + '.pickle'):
-        with open(entry_file+'.pickle', 'rb') as handle:
-            entries = pickle.load(handle)
-    else:
-        entries = CV_HAZOP_checklist(entry_file+'.csv')
-        entries.match_keywords()
-        with open(entry_file+'.pickle', 'wb') as handle:
-            pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
+    #if os.path.isfile(entry_file + '.pickle'):
+    #    with open(entry_file+'.pickle', 'rb') as handle:
+    #        entries = pickle.load(handle)
+    #else:
+    entries = CV_HAZOP_checklist(entry_file+'.csv')
+    entries.match_keywords()
+    with open(entry_file+'.pickle', 'wb') as handle:
+        pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    #return
     #exp_entries_id = ['3', '86', '124', '141', '199', '200', '204', '211', '296', '371', '421', '478', '537', '611', '651', '827', '869', '910', '1017', '1120', '1159']
     #exp_entries_id = ['1159']
     exp_entries = entries.all_entries #random.sample(entries.all_entries, 20)#[e for e in entries.all_entries if e.risk_id in exp_entries_id]
-
+   
+    # most used common words after in ADP(case)
+    #prop = list(itertools.chain.from_iterable([e.prop for e in exp_entries]))
+    #print(prop)
+    #words = (' '.join(prop)).split()
+    #word_count = []
+    #for w in set(words):
+    #    word_count.append((w, words.count(w)))
+    #    if words.count(w) >= 5:
+    #        print(w)
+    #print(word_count)
+    exit()
     # TODO: merge scene, view, image, object
     # synonym of image
     #print(list(set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('image')]))))
-
     # matching
     similarity_threshold = 0.5
     match_results = {}
     for e in exp_entries:
         print(e.risk_id)
+        print(e.matching)
+        #exit()
         #if e.risk_id != '1017':
         #    continue
         match_results[e.risk_id] = {}
@@ -172,24 +191,30 @@ def match(library_name, entry_file):
     return match_results, entries, transformations
 
 def evaluation(library_name):
-    print(library_name)
-    if os.path.isfile(library_name + '_eval.pickle'):
-        with open(library_name + '_eval.pickle', 'rb') as handle:
-            match_results, entries, transformations = pickle.load(handle)
-    else:
-        print('nothing')
+    #if os.path.isfile(library_name + '_eval.pickle'):
+    #    with open(library_name + '_eval.pickle', 'rb') as handle:
+    #        match_results, entries, transformations = pickle.load(handle)
+    #else:
         #match_results, entries, transformations = match(library_name, 'cv_hazop_all')
-    print(len(match_results.keys()))
+    match_results, entries, transformations = match(library_name, 'exp_entries')
+    #match_results, entries, transformations = match(library_name, 'cv_hazop_all')
+    
+    
     # bar chart for how many are in each
     locations = []
     matched_counts = []
     all_covered_counts = []
     for loc in entries.entries:
         print(loc)
-        locations.append(loc)
+        if '-' in loc:
+            loc_fixed = loc.replace("-", "-\n")
+            locations.append(loc_fixed)
+        else:
+            locations.append(loc)
         #matched_count = 0
         entries_at_loc = [x for x in entries.all_entries if x.location == loc]
         #print(len(entries_at_loc))
+
         matched_count = len([x for x in entries_at_loc if match_results[x.risk_id] != {}])
         print('some covered: ' + str(matched_count) + '/' + str(len(entries_at_loc)))
         matched_counts.append(matched_count/len(entries_at_loc))
@@ -210,50 +235,70 @@ def evaluation(library_name):
     
     # Make the plot
     plt.bar(br1, matched_counts, color ='b', width = barWidth,
-            edgecolor ='grey', label ='matched')
+            edgecolor ='grey', label ='partically covered')
     plt.bar(br2, all_covered_counts, color ='g', width = barWidth,
-            edgecolor ='grey', label ='all matched')
+            edgecolor ='grey', label ='fully covered')
     #plt.bar(br3, CSE, color ='b', width = barWidth,
     #        edgecolor ='grey', label ='CSE')
     
     # Adding Xticks
-    plt.xlabel('Location', fontweight ='bold', fontsize = 15)
-    plt.ylabel('Percentage of entries', fontweight ='bold', fontsize = 15)
+    plt.xlabel('Location', fontweight ='bold', fontsize = 20)
+    plt.ylabel('m_l', fontweight ='bold', fontsize = 20)
     plt.xticks([r + barWidth for r in range(len(locations))],
-            locations)
-    
-    plt.legend()
+            locations, fontsize=18)
+    plt.yticks(fontsize=18)
+    plt.ylim([0, 1])
+    plt.legend(prop={'size': 20})
     plt.show()
 
-
     # pie chart for the one most covered, which parameter
-    loc = 'Object'
-    params = []
-    matched_counts = []
-    all_covered_counts = []
+    loc_1 = 'Observer - Electronics'
+    for loc in entries.entries:
+        if loc != loc_1:
+            continue
+        params = []
+        matched_counts = []
+        all_covered_counts = []
+        nothing_covered_all = []
+        for param in entries.entries[loc]:
+            print(param)
+            params.append(param)
+            entries_at_param = [x for x in entries.all_entries if x.location == loc and x.parameter == param]
+            #print(len(entries_at_loc))
+            matched_count = len([x for x in entries_at_param if match_results[x.risk_id] != {}])
+            strp = '\shortstack{'
+            #print('some covered: ' + str(matched_count) + '/' + str(len(entries_at_param)))
+            strp += 'partially: ' + str(matched_count) + '/' + str(len(entries_at_param)) + '\\'
+            matched_counts.append(matched_count/len(entries_at_param))
 
-    for param in entries.entries[loc]:
-        params.append(param)
-        entries_at_param = [x for x in entries.all_entries if x.location == loc and x.parameter == param]
-        #print(len(entries_at_loc))
-        matched_count = len([x for x in entries_at_param if match_results[x.risk_id] != {}])
-        print('some covered: ' + str(matched_count) + '/' + str(len(entries_at_param)))
-        matched_counts.append(matched_count/len(entries_at_param))
+            all_covered = len([x for x in entries_at_param if len(match_results[x.risk_id]) == len(sum(x.matching[:-1], []))])
+            #print('all covered: ' + str(all_covered) + '/' + str(len(entries_at_param)))
+            strp += 'fully: ' + str(all_covered) + '/' + str(len(entries_at_param)) + '}'
+            all_covered_counts.append(all_covered/len(entries_at_param))
+            print(strp)
 
-        all_covered = len([x for x in entries_at_param if len(match_results[x.risk_id]) == len(sum(x.matching[:-1], []))])
-        print('all covered: ' + str(all_covered) + '/' + str(len(entries_at_param)))
-        all_covered_counts.append(all_covered/len(entries_at_param))
+            nothing_covered = [x for x in entries_at_param if len(match_results[x.risk_id]) == 0]
+            #print(nothing_covered)
+            nothing_covered_all += nothing_covered
+        print(len(nothing_covered_all))
+        print(len([x for x in nothing_covered_all if 'No' in x.guide_word]))
 
-    y = np.array(matched_counts)
-    plt.pie(y, labels=params, autopct=lambda p: '{:.0f}%'.format(p), shadow=True)
-    plt.title('some matched for object')
-    plt.show() 
+        y = np.array(matched_counts)
+        plt.pie(y, labels=params, autopct=lambda p: '{:.0f}%'.format(p), shadow=True)
+        plt.title('partically covered entries in ' + loc)
+        plt.show() 
 
-    y = np.array(all_covered_counts)
-    plt.pie(y, labels=params, autopct=lambda p: '{:.0f}%'.format(p ), shadow=True)
-    plt.title('all matched for object')
-    plt.show() 
+        y = np.array(all_covered_counts)
+        plt.pie(y, labels=params, autopct=lambda p: '{:.0f}%'.format(p ), shadow=True)
+        plt.title('fully covered entries in ' + loc)
+        plt.show() 
 
 if __name__ == '__main__':
-    #evaluation('albumentations')
+    evaluation('albumentations')
     evaluation('torchvision')
+    #['338', '361', nothing
+    # '467', '541', '542', '543', objs
+    # '213', see as well as (2)
+    # '554', see more and less
+    #  '602', '603', objects in front of another
+    # '1151'] overexposure?

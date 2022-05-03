@@ -257,7 +257,7 @@ RandomFog.append(json.dumps(RandomFog_parameters))
 Transformations.append(RandomFog)
 
 # RandomGamma
-RandomGamma = ['Random Gamma', 'albumentations', ' Controls the overall brightness of an image.']
+RandomGamma = ['Random Gamma', 'albumentations', '']
 RandomGamma_parameters = {}
 RandomGamma_parameters['gamma_limit'] = 'If gamma_limit is a single float value, the range will be (-gamma_limit, gamma_limit). Default: (80, 120).'
 RandomGamma.append(json.dumps(RandomGamma_parameters))

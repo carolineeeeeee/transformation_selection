@@ -10,7 +10,7 @@ import stanza
 #nlp_c = stanza.Pipeline('en', processors='tokenize,pos,constituency') # initialize English neural pipeline
 nlp_d = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma,depparse')
 
-modifiers = ['nmod', 'amod', 'advmod', 'appos', 'advcl', 'compound']
+modifiers = ['nmod', 'amod', 'advmod', 'appos', 'compound', 'xcomp']
 
 pos_tags = ['VERB', 'NOUN', 'ADJ', 'ADV', 'ADP']
 
@@ -83,13 +83,15 @@ def prepare_match(matched):
     return ' '.join([x.lemma if x.pos != 'ADJ' and 'amod' not in x.deprel  else x.text for x in matched])
 
 def parse(text):
+    #text='objects is behind another'
     doc = nlp_d(text)
     #doc_2 = nlp_c(text)
     #for sentence in doc_2.sentences:
     #    print(sentence.constituency)
     matched_patterns = []
+    prop_patterns = []
     for sent in doc.sentences:
-        #print(*[f'id: {word.id}\tword: {word.text}\thead id: {word.head}\thead: {sent.words[word.head-1].text if word.head > 0 else "root"}\tdeprel: {word.deprel}\tpos: {word.pos}' for word in sent.words], sep='\n')
+        print(*[f'id: {word.id}\tword: {word.text}\thead id: {word.head}\thead: {sent.words[word.head-1].text if word.head > 0 else "root"}\tdeprel: {word.deprel}\tpos: {word.pos}' for word in sent.words], sep='\n')
         
         paired_words = {}
         for w in sent.words:
@@ -169,27 +171,62 @@ def parse(text):
         #print(matched_ids)
 
         # match rest for effect
+        to_remove = ['observer', 'object', 'other', 'scene', 'image', 'lens']
         for w in sent.words:
             if w.id not in matched_ids:
                 if w.id in paired_words and all([x.pos in pos_tags for x in paired_words[w.id]]):
                     #if any([not in_modifiers(x.deprel) for x in paired_words[w.id] if x.pos == 'NOUN']): # has a noun that is not a modifier
                     if w.pos == 'NOUN':
+                        #print(w)
                         matched = paired_words[w.id]
-                        if len(matched) <= 1: # TODO: how do we deal with single word? it creates a lot of false positives
-                            continue
+                        #if len(matched) <= 1 and 'exposure' not in w.text: # TODO: how do we deal with single word? it creates a lot of false positives
+                        #    continue
+                        #if len(matched) == 1 and matched in to_remove:
+                        #    continue
+                        
                         matched_string = prepare_match(matched)
                         overlap = [x for x in matched_patterns if x in matched_string or matched_string in x]
+                        
+                        
                         if len(overlap) > 0:
                             overlap.append(matched_string)
                             max_string = max(overlap, key=len) 
                             for x in overlap:
                                 if x in matched_patterns:
                                     matched_patterns.remove(x)
-                            matched_patterns.append(max_string)
-                        else:
-                            matched_patterns.append(matched_string)
+                            matched_string = max_string
+                        
+                        # check if previous words are propositions
+                        if w.id > 2:
+                            prev_1 = sent.words[w.id -2]
+                            prev_2 = sent.words[w.id -3]
+                            if ((prev_1.pos == 'ADP' and prev_1.deprel == 'case') and (prev_1.lemma == 'in' or prev_1.lemma == 'per')) or ((prev_2.pos == 'ADP' and prev_2.deprel == 'case') and (prev_2.lemma == 'in' or prev_2.lemma == 'per')):
+                                print(w.lemma)
+                                matched_string = 'in-ADP ' + matched_string
+                        #        to_remove = ['observer', 'object', 'other', 'scene', 'image', 'lens']
+                        #    
+                        #        if any([x in to_remove for x in matched_string.split()]):
+                        #            continue
+                            #if any([x in w.text for x in ['image', 'sensor', 'pixel', 'scene']]):
+                            #prop_patterns.append(matched_string)
+                        #else:
+                        matched_patterns.append(matched_string)
+    #matched_patterns = [p for p in matched_patterns if 'in-ADP' not in p or any([w in p for w in ['observer', 'object', 'other', 'scene', 'image', 'lens']])]
     #print(matched_patterns)
-    return matched_patterns
+
+    clean_matched_patterns = []
+    # remove in/per ADP
+    for p in matched_patterns:
+        if 'in-ADP' in p:
+            if any([x in to_remove for x in p.split()]):
+                continue
+            else:
+                clean_matched_patterns.append(p[7:])
+        else:
+            clean_matched_patterns.append(p)
+            
+        
+    return clean_matched_patterns, prop_patterns
 
 def parse_transf(transformation):
     results = []
@@ -215,7 +252,7 @@ def parse_transf(transformation):
     return results
 
 def parse_entry(entry): 
-    algorithm_related = ['algorithm', 'detect', 'interpret', 'recogni']
+    algorithm_related = ['algorithm', 'detect', 'interpret', 'recognize', 'recognition']
     for s in [entry.meaning, entry.consequence, entry.risk]:
         if s.strip() == '':
             entry.matching.append([])
@@ -223,11 +260,14 @@ def parse_entry(entry):
         if s.startswith('see') or s.startswith('also: see') or any([w in s for w in algorithm_related]):
             entry.matching.append([])
             continue
-        print(s)
-        entry.matching.append(parse(s))
+        #print(s)
+        results, prop = parse(s)
+        entry.matching.append(results)
+        entry.prop += prop
     # add info about the combination
-    comb_text = re.sub(" [\(\[].*?[\)\]]", "", entry.guide_word) +' ' + entry.parameter + ' ' + entry.location
-    entry.matching.append([comb_text.lower()])
+    #comb_text = re.sub(" [\(\[].*?[\)\]]", "", entry.guide_word) +' ' + entry.parameter + ' ' + entry.location
+    #entry.matching.append([comb_text.lower()])
+    #print(entry.prop)
     return entry.matching
 
 
