@@ -67,7 +67,7 @@ Risk Id,Location,Guide Word,Parameter,Meaning,Consequence,Risk
 65,Light Sources,Part of,Area,Part of l.s. (area) is visible (although Pos is outside),See Pos,See Pos
 66,Light Sources,Reverse,Area,L.s. shadows the area (because it is an object too),Creates unexpected Texture,See Less and Other than Texture
 67,Light Sources,Reverse,Area,L.s. shadows the area (because it is an object too),-Too weak light on scene,
-68,Light Sources,Spatial periodic,Area,See Num,See Num,
+68,Light Sources,Spatial periodic,Area,See Number,See Number,
 69,Light Sources,Spatial aperiodic,Area,"Instead of focusing the light in the wanted area, the light source spreads the light into different patches",This creates a texture ,See More texture
 70,Light Sources,Temporal periodic,Area,Radiating area changes periodically,Illumination and shading (shadowing) changes predictably,"Appearance and shading of scene may change (significantly) but predictably (""learnable"")"
 71,Light Sources,Temporal aperiodic,Area,Radiating area changes aperiodically,Illumination and shading (shadowing) changes unpredictably,Appearance and shading of scene may change (significantly) and not predictably

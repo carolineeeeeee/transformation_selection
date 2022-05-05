@@ -12,7 +12,7 @@ nlp_d = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma,depparse')
 
 modifiers = ['nmod', 'amod', 'advmod', 'appos', 'compound', 'xcomp']
 
-pos_tags = ['VERB', 'NOUN', 'ADJ', 'ADV', 'ADP']
+pos_tags = ['VERB', 'NOUN', 'ADJ', 'ADV', 'ADP', 'PROPN']
 
 def in_modifiers(deprel):
     new_rel = deprel.split(':')[0]
@@ -22,7 +22,7 @@ def link_modifiers(sent, w):
     #print('in link_modifiers')
     #print(w.text)
     previous_words = [x for x in sent.words if x.head == w.id and x.pos in pos_tags] # find a word that has w as head
-    #print([w.text for w in previous_words])
+    #print([(w.text, w.deprel) for w in previous_words])
     #previous_words = [p_w for p_w in previous_words if in_modifiers(p_w.deprel) or (p_w.pos == 'ADP' and p_w.text == 'of') or 'subj' in p_w.deprel]
     #print([w.text for w in previous_words])
     result = []
@@ -50,8 +50,9 @@ def link_modifiers(sent, w):
                 result += link_modifiers(sent, p_w)
                 #print(result)
             elif in_modifiers(p_w.deprel):
-                if p_w.deprel == 'nmod' and sent.words[p_w.id-2].deprel == 'case' and sent.words[p_w.id-2].lemma != 'of': # separate case except for of that makes a word
-                    continue
+                #print('found modifier')
+                #if p_w.deprel == 'nmod' and sent.words[p_w.id-2].deprel == 'case' and sent.words[p_w.id-2].lemma != 'of': # separate case except for of that makes a word
+                #    continue
                 result += link_modifiers(sent, p_w)
                 #print(result)
             #elif 'subj' in p_w.deprel:
@@ -104,6 +105,7 @@ def parse(text):
             #print([w.text for w in previous_words])
             linked_text = link_modifiers(sent, w)
             #linked_text.sort()
+            
             linked_text = [sent.words[i-1] for i in linked_text]
             paired_words[w.id] = linked_text
             #paired_words[w.id] = [w.text for w in linked_text]
@@ -176,8 +178,8 @@ def parse(text):
             if w.id not in matched_ids:
                 if w.id in paired_words and all([x.pos in pos_tags for x in paired_words[w.id]]):
                     #if any([not in_modifiers(x.deprel) for x in paired_words[w.id] if x.pos == 'NOUN']): # has a noun that is not a modifier
-                    if w.pos == 'NOUN':
-                        #print(w)
+                    if w.pos == 'NOUN' or w.pos == 'PROPN':
+                        #print(w.lemma)
                         matched = paired_words[w.id]
                         #if len(matched) <= 1 and 'exposure' not in w.text: # TODO: how do we deal with single word? it creates a lot of false positives
                         #    continue
@@ -192,9 +194,15 @@ def parse(text):
                             overlap.append(matched_string)
                             max_string = max(overlap, key=len) 
                             for x in overlap:
-                                if x in matched_patterns:
+                                if x in matched_patterns and x != max_string:
+                                    print('removing ' + x)
                                     matched_patterns.remove(x)
-                            matched_string = max_string
+                            #continue
+                            if len(matched_string) < len(max_string):
+                                print('asdf')
+                                continue
+                            else:
+                                matched_string = max_string
                         
                         # check if previous words are propositions
                         if w.id > 2:
@@ -210,10 +218,12 @@ def parse(text):
                             #if any([x in w.text for x in ['image', 'sensor', 'pixel', 'scene']]):
                             #prop_patterns.append(matched_string)
                         #else:
+                        
                         matched_patterns.append(matched_string)
+                        print(matched_patterns)
     #matched_patterns = [p for p in matched_patterns if 'in-ADP' not in p or any([w in p for w in ['observer', 'object', 'other', 'scene', 'image', 'lens']])]
     #print(matched_patterns)
-
+    #print(matched_patterns)
     clean_matched_patterns = []
     # remove in/per ADP
     for p in matched_patterns:
@@ -257,13 +267,29 @@ def parse_entry(entry):
         if s.strip() == '':
             entry.matching.append([])
             continue
-        if s.startswith('see') or s.startswith('also: see') or any([w in s for w in algorithm_related]):
+        if s.startswith('see') or s.startswith('also: see'):
             entry.matching.append([])
             continue
+        
+        if any([w in s for w in algorithm_related]):
+            #print('in algo related')
+            non_algo_related_part = ''
+            #print( s.split(':'))
+            for t in s.split(':'):
+                if not any([w in t for w in algorithm_related]):
+                    non_algo_related_part += t + ' '
+            #print(non_algo_related_part)
+            if len(non_algo_related_part) == 0:
+                entry.matching.append([])
+                continue
+            else:
+                s = non_algo_related_part
         #print(s)
+        #exit()
         results, prop = parse(s)
         entry.matching.append(results)
         entry.prop += prop
+    #exit()
     # add info about the combination
     #comb_text = re.sub(" [\(\[].*?[\)\]]", "", entry.guide_word) +' ' + entry.parameter + ' ' + entry.location
     #entry.matching.append([comb_text.lower()])

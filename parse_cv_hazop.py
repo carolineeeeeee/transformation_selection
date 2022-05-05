@@ -263,7 +263,7 @@ class CV_HAZOP_checklist:
             #entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
 
             for entry in self.all_entries:
-                if entry.risk_id not in ['651', '1017']:#, '603', '602']:
+                if entry.risk_id not in ['124', '199', '200', '421']:#, '603', '602']:
                     continue
                 entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
                 #if 'see' in entry_text:

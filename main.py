@@ -128,7 +128,7 @@ def match(library_name, entry_file):
     #exp_entries_id = ['3', '86', '124', '141', '199', '200', '204', '211', '296', '371', '421', '478', '537', '611', '651', '827', '869', '910', '1017', '1120', '1159']
     #exp_entries_id = ['1159']
     exp_entries = entries.all_entries #random.sample(entries.all_entries, 20)#[e for e in entries.all_entries if e.risk_id in exp_entries_id]
-   
+    exit()
     # most used common words after in ADP(case)
     #prop = list(itertools.chain.from_iterable([e.prop for e in exp_entries]))
     #print(prop)
@@ -139,7 +139,7 @@ def match(library_name, entry_file):
     #    if words.count(w) >= 5:
     #        print(w)
     #print(word_count)
-    exit()
+    #exit()
     # TODO: merge scene, view, image, object
     # synonym of image
     #print(list(set(itertools.chain.from_iterable([ss.lemma_names() for ss in wn.synsets('image')]))))
@@ -147,6 +147,8 @@ def match(library_name, entry_file):
     similarity_threshold = 0.5
     match_results = {}
     for e in exp_entries:
+        if e.risk_id not in ['124', '199', '200', '421']:#, '603', '602']:
+            continue
         print(e.risk_id)
         print(e.matching)
         #exit()
