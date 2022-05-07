@@ -8,3 +8,4 @@ RQ3*
 CIFAR_10_C/*
 .DS_Store
 __pycache__/*
+finetune/*
