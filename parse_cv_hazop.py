@@ -25,7 +25,6 @@ class CV_HAZOP_entry:
         self.parameter = info_df['Parameter']
         self.matching = []
         self.keywords = []
-        self.prop = []
         self.found_keywords = {}
 
 
@@ -115,6 +114,7 @@ class CV_HAZOP_checklist:
         df = pd.read_csv(filename)
         for index, row in df.iterrows():
             entry = CV_HAZOP_entry(row)
+            #print(entry.risk_id)
             # keep only image related entries
             
             if 'Algorithm' in entry.location:
@@ -130,6 +130,7 @@ class CV_HAZOP_checklist:
                 continue
             if entry.consequence == '' and entry.risk == '':
                 continue
+            
             if entry.location not in self.entries:
                 self.entries[entry.location] = {}
             if entry.parameter not in self.entries[entry.location]:
@@ -263,8 +264,10 @@ class CV_HAZOP_checklist:
             #entries.all_entries = random.sample([e for e in entries.all_entries if 'see' in e.consequence or  'see' in e.risk or  'see' in e.meaning], 10) 
 
             for entry in self.all_entries:
-                if entry.risk_id not in ['124', '199', '200', '421']:#, '603', '602']:
-                    continue
+                #print(entry.risk_id)
+                #continue
+                #if entry.risk_id not in ['1120']:#, '603', '602']:
+                #    continue
                 entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
                 #if 'see' in entry_text:
                 print('---------------' + entry.risk_id +'-----------------')

@@ -79,9 +79,12 @@ def link_modifiers(sent, w):
         return result
         
 
-def prepare_match(matched):
+def prepare_match(matched, result_type=2):
     matched = [x for x in matched if 'expect' not in x.lemma and '_' not in x.lemma and 'random' not in x.lemma]
-    return ' '.join([x.lemma if x.pos != 'ADJ' and 'amod' not in x.deprel  else x.text for x in matched])
+    if result_type == 1:
+        return ' '.join([x.lemma if x.pos != 'ADJ' and 'amod' not in x.deprel  else x.text for x in matched])
+    else:
+        return ' '.join([str(x.id) for x in matched])
 
 def parse(text):
     #text='objects is behind another'
@@ -92,7 +95,7 @@ def parse(text):
     matched_patterns = []
     prop_patterns = []
     for sent in doc.sentences:
-        print(*[f'id: {word.id}\tword: {word.text}\thead id: {word.head}\thead: {sent.words[word.head-1].text if word.head > 0 else "root"}\tdeprel: {word.deprel}\tpos: {word.pos}' for word in sent.words], sep='\n')
+        #print(*[f'id: {word.id}\tword: {word.text}\thead id: {word.head}\thead: {sent.words[word.head-1].text if word.head > 0 else "root"}\tdeprel: {word.deprel}\tpos: {word.pos}' for word in sent.words], sep='\n')
         
         paired_words = {}
         for w in sent.words:
@@ -186,7 +189,8 @@ def parse(text):
                         #if len(matched) == 1 and matched in to_remove:
                         #    continue
                         
-                        matched_string = prepare_match(matched)
+                        #matched_list = 
+                        matched_string = prepare_match(matched, result_type=2)
                         overlap = [x for x in matched_patterns if x in matched_string or matched_string in x]
                         
                         
@@ -195,11 +199,11 @@ def parse(text):
                             max_string = max(overlap, key=len) 
                             for x in overlap:
                                 if x in matched_patterns and x != max_string:
-                                    print('removing ' + x)
+                                    #print('removing ' + x)
                                     matched_patterns.remove(x)
                             #continue
                             if len(matched_string) < len(max_string):
-                                print('asdf')
+                                #print('asdf')
                                 continue
                             else:
                                 matched_string = max_string
@@ -209,7 +213,7 @@ def parse(text):
                             prev_1 = sent.words[w.id -2]
                             prev_2 = sent.words[w.id -3]
                             if ((prev_1.pos == 'ADP' and prev_1.deprel == 'case') and (prev_1.lemma == 'in' or prev_1.lemma == 'per')) or ((prev_2.pos == 'ADP' and prev_2.deprel == 'case') and (prev_2.lemma == 'in' or prev_2.lemma == 'per')):
-                                print(w.lemma)
+                                #print(w.lemma)
                                 matched_string = 'in-ADP ' + matched_string
                         #        to_remove = ['observer', 'object', 'other', 'scene', 'image', 'lens']
                         #    
@@ -220,23 +224,69 @@ def parse(text):
                         #else:
                         
                         matched_patterns.append(matched_string)
-                        print(matched_patterns)
+                        #print(matched_patterns)
     #matched_patterns = [p for p in matched_patterns if 'in-ADP' not in p or any([w in p for w in ['observer', 'object', 'other', 'scene', 'image', 'lens']])]
     #print(matched_patterns)
     #print(matched_patterns)
-    clean_matched_patterns = []
-    # remove in/per ADP
-    for p in matched_patterns:
-        if 'in-ADP' in p:
-            if any([x in to_remove for x in p.split()]):
-                continue
+        clean_matched_patterns = []
+        # remove in/per ADP
+        for p in matched_patterns:
+            if 'in-ADP' in p:
+                print('here')
+                if any([sent.words[int(x)-1].lemma in to_remove for x in p.split()[1:]]):
+                    continue
+                else:
+                    clean_matched_patterns.append(p[7:])
             else:
-                clean_matched_patterns.append(p[7:])
-        else:
-            clean_matched_patterns.append(p)
+                clean_matched_patterns.append(p)
+        matched_patterns = clean_matched_patterns
+
+        # check for relationship between NPs matched
+        for i in range(len(sent.words)):
+            if sent.words[i-1].pos == 'ADP' and sent.words[i-1].deprel == 'case': # find a proposition
+                # look for phrases right after (linked by dependency)
+                #print("adp " + str(i))
+                starting_with_i = [x for x in matched_patterns if any([int(w) == sent.words[i-1].head for w in x.split()])]#[x for x in matched_patterns if int(min(x.split())) == i+1] 
+                if len(starting_with_i) != 0:
+                    #print('phrase after prop')
+                    #print(starting_with_i)
+                    
+                    # case: just one prop
+                    ending_with_i = [x for x in matched_patterns if int(max(x.split())) == i-1]
+                    if len(ending_with_i) > 0:
+                        #print('just a prop')
+                        #print(starting_with_i[0])
+                        #print(ending_with_i[0])
+                        if starting_with_i[0] == ending_with_i[0]:
+                            continue
+                        matched_patterns.remove(starting_with_i[0])
+                        matched_patterns.remove(ending_with_i[0])
+                        matched_patterns.append(ending_with_i[0] + ' ' + str(i) + ' ' + starting_with_i[0])
+                        #print(ending_with_i[0] + ' ' + str(i) + ' ' + starting_with_i[0])
+                    # case: adj/adv prop
+                    #ending_with_i = [x for x in matched_patterns if int(max(x.split())) == i-1]
+
+        # translate things back to text
+        text_patterns = []
+        for p in matched_patterns:
+            text_version = ' '.join([sent.words[int(x)-1].text for x in p.split()])
+            text_patterns.append(text_version)
+
+        '''
+        for p in matched_patterns:
+            list_of_words = [int(x) for x in p.split()]
+            list_of_words.sort()
+            if list_of_words[-1] >= len(sent.words)-1:
+                continue
+            last_word = sent.words[list_of_words[-1]-1]
+            next_word_after_last = sent.words[list_of_words[-1]]
+            if next_word_after_last.pos == 'ADP' and last_word.pos == 'ADJ'.deprel == 'case':
+                # check if anything is connected
+                following_this = []
+        '''
             
         
-    return clean_matched_patterns, prop_patterns
+    return text_patterns
 
 def parse_transf(transformation):
     results = []
@@ -262,7 +312,7 @@ def parse_transf(transformation):
     return results
 
 def parse_entry(entry): 
-    algorithm_related = ['algorithm', 'detect', 'interpret', 'recognize', 'recognition']
+    algorithm_related = ['algorithm', 'detect', 'interpret', 'recognize', 'recognition', 'false positive', 'false negative']
     for s in [entry.meaning, entry.consequence, entry.risk]:
         if s.strip() == '':
             entry.matching.append([])
@@ -286,9 +336,8 @@ def parse_entry(entry):
                 s = non_algo_related_part
         #print(s)
         #exit()
-        results, prop = parse(s)
+        results = parse(s)
         entry.matching.append(results)
-        entry.prop += prop
     #exit()
     # add info about the combination
     #comb_text = re.sub(" [\(\[].*?[\)\]]", "", entry.guide_word) +' ' + entry.parameter + ' ' + entry.location
