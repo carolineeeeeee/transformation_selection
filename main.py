@@ -107,27 +107,28 @@ exit()
 
 '''
 def match(library_name, entry_file):
-    if os.path.isfile(library_name + '.pickle'):
-        with open(library_name+'.pickle', 'rb') as handle:
-            transformations = pickle.load(handle)
-    else:
-        transformations = TransformationList('transformations.csv', lib_name=library_name)
-        transformations.match_keywords()
-        with open(library_name+'.pickle', 'wb') as handle:
-            pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
-
-    #if os.path.isfile(entry_file + '.pickle'):
-    #    with open(entry_file+'.pickle', 'rb') as handle:
-    #        entries = pickle.load(handle)
+    #if os.path.isfile(library_name + '.pickle'):
+    #    with open(library_name+'.pickle', 'rb') as handle:
+    #        transformations = pickle.load(handle)
     #else:
-    entries = CV_HAZOP_checklist(entry_file+'.csv')
-    entries.match_keywords()
-    with open(entry_file+'.pickle', 'wb') as handle:
-        pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    transformations = TransformationList('transformations.csv', lib_name=library_name)
+    print('?')
+    transformations.match_keywords()
+    with open(library_name+'.pickle', 'wb') as handle:
+        pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    if os.path.isfile(entry_file + '.pickle'):
+        with open(entry_file+'.pickle', 'rb') as handle:
+            entries = pickle.load(handle)
+    else:
+        entries = CV_HAZOP_checklist(entry_file+'.csv')
+        entries.match_keywords()
+        with open(entry_file+'.pickle', 'wb') as handle:
+            pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
     #return
     #exp_entries_id = ['3', '86', '124', '141', '199', '200', '204', '211', '296', '371', '421', '478', '537', '611', '651', '827', '869', '910', '1017', '1120', '1159']
     #exp_entries_id = ['1159']
-    exp_entries = entries.all_entries #random.sample(entries.all_entries, 20)#[e for e in entries.all_entries if e.risk_id in exp_entries_id]
+    #exp_entries = entries.all_entries #random.sample(entries.all_entries, 20)#[e for e in entries.all_entries if e.risk_id in exp_entries_id]
     # most used common words after in ADP(case)
     #prop = list(itertools.chain.from_iterable([e.prop for e in exp_entries]))
     #print(prop)
@@ -145,7 +146,7 @@ def match(library_name, entry_file):
     # matching
     similarity_threshold = 0.5
     match_results = {}
-    for e in exp_entries:
+    for e in entries.all_entries:
         #if e.risk_id not in ['124', '199', '200', '296', '421']:#, '603', '602']:
         #    continue
         print(e.risk_id)
@@ -192,6 +193,14 @@ def match(library_name, entry_file):
     return match_results, entries, transformations
 
 def evaluation(library_name):
+    if os.path.isfile('?' + '_eval.pickle'):
+        with open(library_name + '_eval.pickle', 'rb') as handle:
+            entries = pickle.load(handle)
+    else:
+        match_results, entries, transformations = match(library_name, 'cv_hazop_all')
+        #match_results, entries, transformations = match(library_name, 'exp_entries')
+    return
+
     #if os.path.isfile(library_name + '_eval.pickle'):
     #    with open(library_name + '_eval.pickle', 'rb') as handle:
     #        match_results, entries, transformations = pickle.load(handle)

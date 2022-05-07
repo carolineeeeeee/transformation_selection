@@ -54,6 +54,7 @@ class TransformationList:
 				self.all_transformations.append(trans_entry)
 
 	def match_keywords(self):
+		print('match keywords')
 		# match keywords
 		all_keywords = []
 		transformations_keywords = {}
