@@ -4,3 +4,6 @@ models/*
 RQ3*
 *.pdf
 *.txt
+*.pyc
+CIFAR_10_C/*
+.DS_Store
