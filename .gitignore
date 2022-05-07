@@ -1,0 +1,6 @@
+*.pickle
+old/*
+models/*
+RQ3*
+*.pdf
+*.txt
