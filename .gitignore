@@ -1,11 +1,15 @@
-*.pickle
-old/*
-models/*
+git rm --cached*.pickle
+old*
+models*
 RQ3*
 *.pdf
 *.txt
 *.pyc
-CIFAR_10_C/*
+CIFAR_10_C*
 .DS_Store
-__pycache__/*
-finetune/*
+__pycache__*
+finetune*
+expert_exp*
+cv_hazop_light_sources.csv
+image_processing_terms.txt
+transformations.py
