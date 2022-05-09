@@ -45,6 +45,7 @@ def get_model(model_name: str, pretrained: bool = True, val: bool = True) -> nn.
 	:raises ValueError: Invalid Model Name
 	:return: a pytorch model
 	:rtype: nn.Module
+	Source: https://github.com/carolineeeeeee/automating_requirements
 	"""
 	if model_name in ROBUSTBENCH_CIFAR10_MODEL_NAMES:
 		if 'L2' in model_name:
@@ -60,9 +61,6 @@ def get_model(model_name: str, pretrained: bool = True, val: bool = True) -> nn.
 
 def convert_array_to_img(data, index):
 	image_array = data[index]
-	#print(image_array[:1024].shape)
-	#print(image_array[1024:2048].shape)
-	#print(image_array[2048:].shape)
 	red = np.reshape(image_array[:1024], (32, 32))
 	green = np.reshape(image_array[1024:2048], (32, 32))
 	blue = np.reshape(image_array[2048:], (32, 32))
@@ -84,7 +82,6 @@ def Color_jitter (x, i):
 	color_jitter = A.ReplayCompose([ColorJitter(brightness=0, contrast=c[i], saturation=s[i], hue=h[i], always_apply=True)])
 	transformed_img = color_jitter(image=x)
 	# to get the parameters that are actually used
-	#arguments = str(transformed_img['replay']['transforms'][0]['params']['contrast']) + ", " + str(transformed_img['replay']['transforms'][0]['params']['saturation']) + ", " + str(transformed_img['replay']['transforms'][0]['params']['hue'])
 	return transformed_img['image']
 
 def Sharpen_img(x):
@@ -93,7 +90,9 @@ def Sharpen_img(x):
 	return sharpened_img['image']
 
 def brightness(x, i):
-	#c = [.1, .2, .3, .4, .5]
+	"""
+	Source: https://github.com/hendrycks/robustness
+	"""
 	c = np.linspace(0, 1, 100)	 
 
 	x = np.array(x) / 255.
@@ -104,12 +103,8 @@ def brightness(x, i):
 	return np.clip(x, 0, 1) * 255#, c[i]
 
 def Random_Gamma (x):
-	#c = [(80, 120), (90, 130), (100, 140), (120, 150), (130, 160)]
 	RG = A.ReplayCompose([RandomGamma(gamma_limit=(0, 300), always_apply=True)])
 	transformed_img = RG (image=x)
-	# to get the parameters that are actually used
-	#arguments = str(transformed_img['replay']['transforms'][0]['params']['gamma'])
-	
 	return transformed_img['image']#, arguments
 
 def entry_128(x, i):
@@ -123,8 +118,9 @@ def entry_5(x, i):
 	return bright_and_sharp
 
 def contrast(x, i):
-#def contrast(x, severity=1):
-	#c = [0.4, .3, .2, .1, .05]
+	"""
+	Source: https://github.com/hendrycks/robustness
+	"""
 	c = np.linspace(0.01, 0.9, 100)
 
 	x = np.array(x) / 255.
@@ -136,6 +132,7 @@ def parse_cifar10(save_path, T=Color_jitter):
 	:param label_path:
 	:param use_filename: whether using filename as the key or number as the key
 	:return:
+	Source: https://github.com/carolineeeeeee/automating_requirements
 	"""
 	if not os.path.isdir(save_path):
 		os.mkdir(save_path)
@@ -177,83 +174,6 @@ def parse_cifar10_c(save_path):
 
 	return 0
 
-'''
-
-def load_cifar10_data(data_path: pathlib2.Path):
-	"""
-	Read labels information from a dataset
-	Labels.csv is a mapping for filenames and labels.
-	:param data_path: directory containing all images and a labels.csv
-	:return:
-	"""
-	if (data_path / 'labels.csv').exists():
-		df = pd.read_csv(data_path / 'labels.csv', index_col=0)   # should contain 2 columns: filename, label
-		df['original_filename'] = df['filename']
-		df['original_path'] = df['original_filename'].apply(lambda filename: os.path.join(str(data_path), filename))
-		return df
-	else:
-		raise OSError(f"label file not found, labels.csv should be present in {data_path}")
-
-def run_model(model_name: str, bootstrap_df: pd.DataFrame, cpu: bool = False, batch_size: int = 10,
-			  dataset_class: Dataset = Cifar10Dataset):
-	model = get_model(model_name, pretrained=True, val=True)
-	device = torch.device('cuda' if torch.cuda.is_available() and not cpu else 'cpu')
-	logger.info(f"Device: {str(device)}")
-	model.to(device)
-	batches = bootstrap_df['bootstrap_iter_id'].unique()
-	pbar = tqdm(total=len(bootstrap_df))
-	prediction_records = []
-	err_top_5 = 0
-	err_top_1 = 0
-	total_image = 0
-	for bootstrap_iter_id in batches:
-		df = bootstrap_df[bootstrap_df['bootstrap_iter_id'] == bootstrap_iter_id]
-		dataset = dataset_class(df)
-		dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=False,
-												 num_workers=1)
-
-		for i, data in enumerate(dataloader):
-			original_images = data['original_image'].to(device)
-			new_images = data['new_image'].to(device)
-
-			labels = data['label'].to(device)
-			transformed_result = model(new_images)
-			original_result = model(original_images)
-
-			new_pred = torch.argmax(transformed_result, dim=1)
-			original_pred = torch.argmax(original_result, dim=1)
-
-			actual_batch_size = len(new_pred)
-			top_1_error_count = actual_batch_size - int(torch.sum(labels == new_pred))
-			top_5_error_count = actual_batch_size - int(
-				torch.sum(torch.sum(torch.eq(labels.unsqueeze(1).repeat(1, 5), new_pred.topk(5).indices),
-									dim=1)))
-			total_image += actual_batch_size
-			new_pred = new_pred.tolist()
-			original_pred = original_pred.tolist()
-			for k, label in enumerate(labels.tolist()):
-				prediction_records.append({
-					'model_name': model_name,
-					'bootstrap_iter_id': bootstrap_iter_id,
-					'dataload_itr_id': i,
-					'within_iter_id': k,
-					'label': label,
-					'new_prediction': new_pred[k],
-					'original_prediction': original_pred[k],
-					'transformation': data['transformation'][k],
-					'original_filename': data['original_filename'][k],
-					'new_filename': data['new_filename'][k],
-					'original_path': data['original_path'][k],
-					'new_path': data['new_path'][k],
-					'vd_score': float(data['vd_score'][k]),
-				})
-			pbar.set_postfix({f'Iteration': bootstrap_iter_id})
-			pbar.update(actual_batch_size)
-	records_df = pd.DataFrame(data=prediction_records)
-	return records_df
-
-'''
-
 
 if __name__ == '__main__':
 	#print(torch.cuda.is_available())
@@ -266,25 +186,14 @@ if __name__ == '__main__':
 	for t in [brightness, entry_128, entry_5, contrast]:
 		print(t.__name__)
 		folder_name = 'RQ3_' + t.__name__
-		#parse_cifar10(RQ3)
 		parse_cifar10(folder_name, T=t)
-		#parse_cifar10_c(CIFAR_10_C)
-		#exit()
+
 		transform = transforms.ToTensor()
 		dataset = datasets.ImageFolder(folder_name, transform=transform)
 		dataloader = torch.utils.data.DataLoader(dataset, batch_size=32, shuffle=True)
 
-		#images, labels = next(iter(dataloader))
-		#print(images[0])
-		#cv2.imshow(images[0])
-		
-		#testset = torchvision.datasets.CIFAR10(root='./RQ3_images', train=False,
-		#                                   download=True)
-		#testloader = torch.utils.data.DataLoader(testset, batch_size=100,
-		#                                        shuffle=False, num_workers=2)
 		for model_name in ROBUSTBENCH_CIFAR10_MODEL_NAMES:
 			model = get_model(model_name)
-			#print(model_name)
 			device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 			accs = []
 			num_epochs = 0
@@ -295,7 +204,6 @@ if __name__ == '__main__':
 				transformed_result = model(data)
 				pred = torch.argmax(transformed_result, dim=1)
 				acc = torch.sum(pred == target)
-				#print(i, acc/32)
 				accs.append(acc/32)
 				num_epochs = i
 				break

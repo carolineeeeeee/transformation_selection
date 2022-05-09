@@ -1,13 +1,5 @@
-#from curses.ascii import NL
-#from turtle import pos
-#from nltk import word_tokenize
-#import spacy
-#import itertools
-from nltk.corpus import wordnet as wn
-import re
 import stanza
 
-#nlp_c = stanza.Pipeline('en', processors='tokenize,pos,constituency') # initialize English neural pipeline
 nlp_d = stanza.Pipeline(lang='en', processors='tokenize,pos,lemma,depparse')
 
 modifiers = ['nmod', 'amod', 'advmod', 'appos', 'compound', 'xcomp']
@@ -19,62 +11,31 @@ def in_modifiers(deprel):
     return new_rel in modifiers
 
 def link_modifiers(sent, w):
-    #print('in link_modifiers')
-    #print(w.text)
     previous_words = [x for x in sent.words if x.head == w.id and x.pos in pos_tags] # find a word that has w as head
-    #print([(w.text, w.deprel) for w in previous_words])
-    #previous_words = [p_w for p_w in previous_words if in_modifiers(p_w.deprel) or (p_w.pos == 'ADP' and p_w.text == 'of') or 'subj' in p_w.deprel]
-    #print([w.text for w in previous_words])
     result = []
 
     if len(previous_words) == 0:
         if w.deprel == 'conj':
-            #print(w.text)
             paral_word = sent.words[w.head-1]
-            #print('paral word: ' + paral_word.text)
             paral_result = link_modifiers(sent, paral_word)
-            #print('paral word result: ' + ' '.join([sent.words[x-1].text for x in paral_result]))
             paral_result.remove(paral_word.id)
             paral_result.append(w.id)
-            #print(' '.join([sent.words[x-1].text for x in paral_result]))
             return paral_result
         else:
             return [w.id]
     else:
         for p_w in previous_words:
-            #print(p_w.text)
-            #if 'random' in p_w.text:
-            #    continue
             if p_w.pos == 'ADP' and p_w.text == 'of':
-                #print('of')
                 result += link_modifiers(sent, p_w)
-                #print(result)
             elif in_modifiers(p_w.deprel):
-                #print('found modifier')
-                #if p_w.deprel == 'nmod' and sent.words[p_w.id-2].deprel == 'case' and sent.words[p_w.id-2].lemma != 'of': # separate case except for of that makes a word
-                #    continue
                 result += link_modifiers(sent, p_w)
-                #print(result)
-            #elif 'subj' in p_w.deprel:
-            #    print('subj')
-            #    result += link_modifiers(sent, p_w)
-            #    print(result)
-            #elif 'root' in p_w.deprel and p_w.pos == 'ADJ':
-            #    print('root')
-            #    result += link_modifiers(sent, p_w)
         result += [w.id]
         
         if w.deprel == 'conj':
-            #print(w.text)
             paral_word = sent.words[w.head-1]
             if 'random' not in paral_word.text:
-                #print('paral word: ' + paral_word.text)
                 paral_result = link_modifiers(sent, paral_word)
-                #print('paral word result: ' + ' '.join([sent.words[x-1].text for x in paral_result]))
                 paral_result.remove(paral_word.id)
-                #paral_result.append(w.id)
-                #print(' '.join([sent.words[x-1].text for x in paral_result]))
-                #return paral_result
                 return result + paral_result 
         return result
         
@@ -87,11 +48,7 @@ def prepare_match(matched, result_type=2):
         return ' '.join([str(x.id) for x in matched])
 
 def parse(text):
-    #text='objects is behind another'
     doc = nlp_d(text)
-    #doc_2 = nlp_c(text)
-    #for sentence in doc_2.sentences:
-    #    print(sentence.constituency)
     text_patterns = []
     for sent in doc.sentences:
         #print(*[f'id: {word.id}\tword: {word.text}\thead id: {word.head}\thead: {sent.words[word.head-1].text if word.head > 0 else "root"}\tdeprel: {word.deprel}\tpos: {word.pos}' for word in sent.words], sep='\n')
@@ -194,7 +151,7 @@ def parse(text):
         for i in range(len(sent.words)):
             if sent.words[i-1].pos == 'ADP' and sent.words[i-1].deprel == 'case': # find a proposition
                 # look for phrases right after (linked by dependency)
-                starting_with_i = [x for x in matched_patterns if any([int(w) == sent.words[i-1].head for w in x.split()])]#[x for x in matched_patterns if int(min(x.split())) == i+1] 
+                starting_with_i = [x for x in matched_patterns if any([int(w) == sent.words[i-1].head for w in x.split()])]
                 if len(starting_with_i) != 0:
                     ending_with_i = [x for x in matched_patterns if int(max(x.split())) == i-1]
                     if len(ending_with_i) > 0:
@@ -218,24 +175,12 @@ def parse(text):
 def parse_transf(transformation):
     results = []
     # first add name and parameter names
-    #names = [] 
     if '_' in transformation.name:
         results.append(' '.join(transformation.name.lower().split('_')))
     else:
         results.append(transformation.name.lower())
-    
-    
-    #for p in transformation.parameters:
-    #    names.append(p.replace('_', ' '))
-    #results.append(names)
-    #print(results)
 
-    # then parse description
     results += parse(transformation.description)
-    #for p in transformation.parameters:
-    #    results+=parse(transformation.parameters[p])
-    
-    #print(results)
     return results
 
 def parse_entry(entry): 
@@ -249,27 +194,19 @@ def parse_entry(entry):
             continue
         
         if any([w in s for w in algorithm_related]):
-            #print('in algo related')
             non_algo_related_part = ''
-            #print( s.split(':'))
             for t in s.split(':'):
                 if not any([w in t for w in algorithm_related]):
                     non_algo_related_part += t + ' '
-            #print(non_algo_related_part)
             if len(non_algo_related_part) == 0:
                 entry.matching.append([])
                 continue
             else:
                 s = non_algo_related_part
-        #print(s)
-        #exit()
+
         results = parse(s)
         entry.matching.append(results)
-    #exit()
-    # add info about the combination
-    #comb_text = re.sub(" [\(\[].*?[\)\]]", "", entry.guide_word) +' ' + entry.parameter + ' ' + entry.location
-    #entry.matching.append([comb_text.lower()])
-    #print(entry.prop)
+
     return entry.matching
 
 

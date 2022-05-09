@@ -19,7 +19,6 @@ def reduce(x):
         return results[:-1]
     else:
         return wordnet_lemmatizer.lemmatize(x)
-# the stem: blurry -> blurri, filter -> filter/filt?
 
 def new_reduce(x):
     result = []
@@ -35,27 +34,18 @@ def find_keywords(texts, stemmed_keywords, is_transf=False):
     if is_transf: # looking for exact match
         found_keywords = {}
         for text in texts:
-            #print(text)
             token_words=word_tokenize(text)
             stemmed = {reduce(word) for word in token_words}
-            #print(stemmed)
             for w in stemmed_keywords.keys():
-                #if w == 'median filter':
-                #    print(set(word_tokenize(reduce(w))))
-                #    print('------------------------')
                 if set(stemmed) >= set(word_tokenize(reduce(w))):
                     if len(word_tokenize(reduce(w))) > 0:
                         found_keywords[w] = word_tokenize(reduce(w))
-                        #print(found_keywords)
-            #results += list([w for w in stemmed_keywords.keys() if set(stemmed) >= set(word_tokenize(stemmed_keywords[w][0]))])
-        #print(found_keywords)
         to_remove = []
         for w in found_keywords:
             if any([set(found_keywords[x])>set(found_keywords[w]) for x in found_keywords]):
                 to_remove.append(w)
         return [w for w in found_keywords.keys() if w not in to_remove] 
     else: # also looking for synonyms
-        # TODO: order of meaning, consequence, risk messed up
         all_results = []
         found_keywords = {}
         for l in texts:
@@ -63,23 +53,12 @@ def find_keywords(texts, stemmed_keywords, is_transf=False):
             for text in l:
                 token_words=word_tokenize(text)
                 stemmed = {reduce(word) for word in token_words}
-                #print(stemmed)
-                #TODO:  write loop first then change
                 for w in stemmed_keywords.keys():
                     for s in stemmed_keywords[w]:
-                        #if w == 'blur':
-                            #print(set(stemmed))
-                            #print(set(word_tokenize(s)))
-                            #print(set(stemmed) >= set(word_tokenize(s)))
                         if set(stemmed) >= set(word_tokenize(s)):
                             if len(word_tokenize(s)) > 0:
-                                #print(word_tokenize(s), w)
                                 found_keywords_l[w] = word_tokenize(s)
                                 break
-                #found_keywords = [set(word_tokenize(s)) for s in stemmed_keywords[w] if set(stemmed) >= set(word_tokenize(s))]
-                #results += list([w for w in stemmed_keywords.keys() if any([set(stemmed) >= set(word_tokenize(s)) for s in stemmed_keywords[w]])])
-            
-                #print(found_keywords)
             to_remove = []
             for w in found_keywords_l:
                 if 'image' in w:
@@ -91,19 +70,6 @@ def find_keywords(texts, stemmed_keywords, is_transf=False):
 
 
         return all_results, found_keywords
-    '''
-    token_words=word_tokenize(text)
-    stemmed = [porter.stem(word) for word in token_words]
-    clean_text = ' ' + " ".join(stemmed) + ' '    
-    found_keywords = [w for w in stemmed_keywords.keys() if any([(' ' + syn+' ' in clean_text) for syn in stemmed_keywords[w]])]#.split()]
-    # if light source exist, remove light and source
-    to_remove = []
-    for w in found_keywords:
-        if ' ' in w:
-            to_remove += w.split()
-        
-    return [w for w in found_keywords if w not in to_remove] 
-    '''
 
 def group_keywords(entry_keywords_to_transf, entry):
     # group based on match
@@ -112,7 +78,6 @@ def group_keywords(entry_keywords_to_transf, entry):
     for k in list_keywords:
         if k not in sum(groups, []):
             same_match = [j for j in list_keywords if set(entry.found_keywords[j]) == set(entry.found_keywords[k])]
-            #similar = [j for j in list_keywords if porter.stem(j) in stemmed_keywords[k]]
             groups.append(same_match)
     grouped_match = {}
     
@@ -126,7 +91,6 @@ def group_keywords(entry_keywords_to_transf, entry):
         for k in group:
             group_match += entry_keywords_to_transf[entry.risk_id][k]
         group_match = list(set(group_match))
-        #group_match = list(set(sum([entry_keywords_to_transf[entry][k] for k in group], [])))
         grouped_match[group_name] = group_match
 
     return grouped_match
@@ -137,23 +101,18 @@ def group_keywords_2(entry_keywords_to_transf, stemmed_keywords):
         if entry not in grouped_match:
             grouped_match[entry] = {}
         list_keywords = entry_keywords_to_transf[entry].keys()
-        #print(list_keywords)
         groups = []
         for k in list_keywords:
             if k not in sum(groups, []):
                 similar = [j for j in list_keywords if reduce(j) in stemmed_keywords[k]]
                 groups.append(similar)
-        #print(groups)
-        
-        # TODO: remove words like image and scene (might be okay if we consider all entries and remove repeated keywords)
-        # temp fix: manually remove
+
         for group in groups:
             group_name = ', '.join(group)
             if 'image' in group_name or 'scene' in group_name: #temp fix
                 continue 
             group_match = list(set(sum([entry_keywords_to_transf[entry][k] for k in group], [])))
             grouped_match[entry][group_name] = group_match
-    print(grouped_match)
     return grouped_match
 
 def stem(text):
@@ -192,10 +151,6 @@ def load_keywords(keywords_file):
                 synonyms.append(abbrv)
             keywords[w] += synonyms
     return keywords
-
-def group_keyword_results(entry_keywords_to_transf): # entry_keywords_to_transf[entry.risk_id][word].append(t.name)
-    word_groups = {}
-    return 0
 
 def check_parcing(text):
     nlp = spacy.load("en_core_web_lg")
