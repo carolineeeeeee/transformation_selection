@@ -2,10 +2,7 @@ import pandas as pd
 from nltk.stem import PorterStemmer
 porter = PorterStemmer()
 from pattern_matching import *
-from utils import *
-import pickle
 import re
-import os
 
 class CV_HAZOP_entry:
     """A class for transformation information"""

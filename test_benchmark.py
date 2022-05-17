@@ -1,7 +1,6 @@
 import torch
 import torch.nn as nn
 from robustbench import load_model
-import pandas as pd
 import pickle
 import numpy as np
 from albumentations.augmentations.transforms import *

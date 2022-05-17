@@ -1,6 +1,5 @@
 from parse_cv_hazop import *
 from parse_transformations import *
-from utils import *
 from pattern_matching import *
 import pickle
 import os
