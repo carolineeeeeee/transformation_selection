@@ -4,7 +4,7 @@ from pattern_matching import *
 import pickle
 import os
 import numpy as np
-
+import itertools
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
