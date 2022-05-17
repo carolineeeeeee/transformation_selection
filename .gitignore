@@ -2,7 +2,7 @@ git rm --cached*.pickle
 old*
 models*
 RQ3*
-*.pdf
+*CV-HAZOP*.pdf
 *.txt
 *.pyc
 CIFAR_10_C*
