@@ -5,7 +5,6 @@ from pattern_matching import *
 import pickle
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -16,23 +15,23 @@ BERT_model = SentenceTransformer('all-distilroberta-v1')
 BERT_model_2 = SentenceTransformer('all-mpnet-base-v2') 
 
 def match(library_name, entry_file):
-    if os.path.isfile(library_name + '.pickle'):
-        with open(library_name+'.pickle', 'rb') as handle:
+    if os.path.isfile('outputs/' + library_name + '.pickle'):
+        with open('outputs/' + library_name+'.pickle', 'rb') as handle:
             transformations = pickle.load(handle)
     else:
-        transformations = TransformationList('transformations.csv', lib_name=library_name)
-        transformations.match_keywords()
+        transformations = TransformationList('inputs/transformations.csv', lib_name=library_name)
+        transformations.parse_effect_action()
 
-    with open(library_name+'.pickle', 'wb') as handle:
-        pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
+    with open('outputs/' + library_name+'.pickle', 'wb') as handle:
+        pickle.dump('outputs/' + transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
-    if os.path.isfile(entry_file + '.pickle'):
-        with open(entry_file+'.pickle', 'rb') as handle:
+    if os.path.isfile('outputs/' + entry_file + '.pickle'):
+        with open('outputs/' + entry_file+'.pickle', 'rb') as handle:
             entries = pickle.load(handle)
     else:
-        entries = CV_HAZOP_checklist(entry_file+'.csv')
+        entries = CV_HAZOP_checklist('inputs/' + entry_file+'.csv')
         entries.parse_effect_action()
-        with open(entry_file+'.pickle', 'wb') as handle:
+        with open('outputs/' + entry_file+'.pickle', 'wb') as handle:
             pickle.dump(entries, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     similarity_threshold = 0.5
@@ -66,13 +65,13 @@ def match(library_name, entry_file):
                 match_results[e.risk_id][e_text[pair[0]]].append((t.name, t.match[pair[1]]))
             #exit()
         print(match_results[e.risk_id])
-    with open(library_name + '_eval.pickle', 'wb') as handle:
+    with open('outputs/' + library_name + '_eval.pickle', 'wb') as handle:
         pickle.dump((match_results, entries, transformations), handle, protocol=pickle.HIGHEST_PROTOCOL)
     return match_results, entries, transformations
 
 def evaluation(library_name, cv_hazop_entries='cv_hazop_all'):
-    if os.path.isfile(library_name + '_eval.pickle'):
-        with open(library_name + '_eval.pickle', 'rb') as handle:
+    if os.path.isfile('outputs/' + library_name + '_eval.pickle'):
+        with open('outputs/' + library_name + '_eval.pickle', 'rb') as handle:
             match_results, entries, transformations = pickle.load(handle)
             #exit()
     else:
@@ -129,7 +128,6 @@ def evaluation(library_name, cv_hazop_entries='cv_hazop_all'):
         
 
 if __name__ == '__main__':
-
     import argparse
     
     parser = argparse.ArgumentParser(description="The automated matching method. It first matches transformations to CV-HAZOP entries then evulate coverage.",

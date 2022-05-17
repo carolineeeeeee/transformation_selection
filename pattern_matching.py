@@ -138,7 +138,6 @@ def parse(text):
             # remove in/per ADP
             for p in matched_patterns:
                 if 'in-ADP' in p:
-                    print('here')
                     if any([sent.words[int(x)-1].lemma in to_remove for x in p.split()[1:]]):
                         continue
                     else:
@@ -162,12 +161,8 @@ def parse(text):
                         matched_patterns.append(ending_with_i[0] + ' ' + str(i) + ' ' + starting_with_i[0])
 
         # translate things back to text
-        print(len(sent.words))
         for p in matched_patterns:
-            print(p)
-            print([int(x) for x in p.split()])
             text_version = ' '.join([sent.words[int(x)-1].text for x in p.split()])
-            print(text_version)
             text_patterns.append(text_version)
         
     return text_patterns

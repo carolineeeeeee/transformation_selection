@@ -1,5 +1,3 @@
-from re import S
-import torchvision
 import torch
 import torch.nn as nn
 from robustbench import load_model

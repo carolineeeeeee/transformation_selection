@@ -1,6 +1,7 @@
 # What to Check: Systematic Selection of Transformations for Analyzing Reliability of Machine Vision Components
 
 ## Required Inputs
+Files are stored in inputs/
 1. a csv file containing image transformation information, called *transformations.csv*. The script *gen_transf_csv.py* is used to generate this csv. **Note**: only modify *gen_transf_csv.py* to add or remove transformations. Currently, it contains all the transformations in the library [Albumentation](https://albumentations.ai/docs/getting_started/transforms_and_targets/) and library [Torchvision](https://pytorch.org/vision/stable/transforms.html).
 2. a csv file containg CV-HAZOP entries. E.g., *cv_hazop_all.csv* contains all CV-HAZOP entries, and exp_extries contains 20 entries used in our evaluation experiment. 
 
@@ -18,14 +19,13 @@ For example, to match the entire CV-HAZOP checklist with image transformations i
 `python main.py -c cv_hazop_all -t albumentations`
 
 **Note**:
-
 1. All transformations should be stored in *transformations.csv*
 2. for the csv file containing CV-HAZOP entries, only include the name without '.csv' extension. For example, to consider *cv_hazop_all.csv*, only use 'cv_hazop_all'
-2. The library name should exist in *transformations.csv*.
-
+3. The library name should exist in *transformations.csv*.
+4. Python 3.8.5 is recommended.
 
 ## Outputs
-We also included saved pickle files for evaluation results. 
+We also included saved pickle files for evaluation results in outputs/. 
 1. *cv_hazop_all.pickle*: contains all effects and actions for all entries
 2. *albumentation.pickle*: contains all effects and actions for all transformations in the library [Albumentation](https://albumentations.ai/docs/getting_started/transforms_and_targets/)
 3. *torchvision.pickle*: contains all effects and actions for all transformations in the library [Torchvision](https://pytorch.org/vision/stable/transforms.html)
@@ -33,16 +33,12 @@ We also included saved pickle files for evaluation results.
 5. *torchvision_eval.pickle*: contains the matching of scene changes in all CV-HAZOP entries to Torchvision image transformations. 
 
 ## Experiment with experts
-1. *expert_results.pdf*
+*expert_results.pdf* contains: 
 
-    This file contains: 
-    
-    i. Individual expert results for identifying image transformations simulating the CV-HAZOP entries. 
-    
-    ii. 'Ground truth' obtained by transformations agreed by the majority of the experts participated in the experiment after the discussion of difference in their results and our results. 
+1. Individual expert results for identifying image transformations simulating the CV-HAZOP entries. 
 
-    iii. Mapping results by our systematic method and the automation of the systematic method. 
+2. 'Ground truth' obtained by transformations agreed by the majority of the experts participated in the experiment after the discussion of difference in their results and our results. 
 
-2. *?.pdf*
+3. Mapping results by our systematic method and the automation of the systematic method. 
 
-    This file contains challenges identified by each participant and their feedback on how well our method addressed it. 
+4. Challenges identified by each participant and their feedback on how well our method addressed it. 

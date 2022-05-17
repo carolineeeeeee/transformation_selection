@@ -6,8 +6,6 @@ from pattern_matching import *
 
 class Transformation:
 	"""A class for transformation information"""
-
-	# TODO: later update format
 	def __init__(self, index, row):
 		self.keywords = []
 		self.index = index
@@ -48,10 +46,8 @@ class TransformationList:
 				trans_entry = Transformation(index, row)
 				self.all_transformations.append(trans_entry)
 
-	def match_keywords(self):
-		print('match keywords')
+	def parse_effect_action(self):
 		# match keywords
-		all_keywords = []
 		transformations_keywords = {}
 		for transf in self.all_transformations:
 			print(transf.name)

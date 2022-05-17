@@ -217,16 +217,12 @@ class CV_HAZOP_checklist:
         print(set(self.abbr))
     
     def parse_effect_action(self):
-        if os.path.isfile('inter.pickle'):
-            with open('inter.pickle', 'rb') as handle:
-                self = pickle.load(handle)
-        else:
-            for entry in self.all_entries:
-                entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
-                print('---------------' + entry.risk_id +'-----------------')
-                print(entry_text)
-                parse_entry(entry)
-                print(entry.matching)
+        for entry in self.all_entries:
+            entry_text = (entry.meaning + '. ' + entry.consequence + '. ' + entry.risk).lower() + '.'    
+            print('---------------' + entry.risk_id +'-----------------')
+            print(entry_text)
+            parse_entry(entry)
+            print(entry.matching)
         self.matching_with_see()
         
 
