@@ -8,8 +8,6 @@ import itertools
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
 
-entry_keywords_to_transf = {}
-
 BERT_model = SentenceTransformer('all-distilroberta-v1') 
 BERT_model_2 = SentenceTransformer('all-mpnet-base-v2') 
 
@@ -22,7 +20,7 @@ def match(library_name, entry_file):
         transformations.parse_effect_action()
 
     with open('outputs/' + library_name+'.pickle', 'wb') as handle:
-        pickle.dump('outputs/' + transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
+        pickle.dump(transformations, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
     if os.path.isfile('outputs/' + entry_file + '.pickle'):
         with open('outputs/' + entry_file+'.pickle', 'rb') as handle:
@@ -85,20 +83,23 @@ def evaluation(library_name, cv_hazop_entries='cv_hazop_all'):
         else:
             locations.append(loc)
         entries_at_loc = [x for x in entries.all_entries if x.location == loc]
-        total_scene_changes = 0
-        scene_changes_matched = 0
+        total_scene_changes = []
+        scene_changes_matched = []
         for e in entries_at_loc:
             scene_changes_e = list(itertools.chain.from_iterable(e.matching))
-            total_scene_changes += len(scene_changes_e)
+            #total_scene_changes += len(scene_changes_e)
+            total_scene_changes += scene_changes_e
             matched_changes_e = [x for x in scene_changes_e if x in match_results[e.risk_id]]
-            scene_changes_matched += len(matched_changes_e)
+            scene_changes_matched += matched_changes_e
+            #scene_changes_matched += len(matched_changes_e)
+        
 
         all_covered = len([x for x in entries_at_loc if len(match_results[x.risk_id]) == len(sum(x.matching, []))])
         percentage = all_covered/len(entries_at_loc) * 100 
         print('entries covered: '  + str(percentage) + '\%' + ' (' + str(all_covered) + '/' + str(len(entries_at_loc))+ ')')
 
-        percentage = scene_changes_matched/total_scene_changes * 100 
-        print('scene changes covered: ' + str(percentage) + '\%' + ' (' + str(scene_changes_matched) + '/' + str(total_scene_changes)+ ')')
+        percentage = len(set(scene_changes_matched))/len(set(total_scene_changes)) * 100 
+        print('scene changes covered: ' + str(percentage) + '\%' + ' (' + str(len(set(scene_changes_matched))) + '/' + str(len(set(total_scene_changes)))+ ')')
        
         
     loc_1 = 'Observer - Electronics'
@@ -110,20 +111,22 @@ def evaluation(library_name, cv_hazop_entries='cv_hazop_all'):
             print(param)
             entries_at_param = [x for x in entries.all_entries if x.location == loc and x.parameter == param]
 
-            scene_changes_matched = 0
-            total_scene_changes = 0
+            scene_changes_matched = []
+            total_scene_changes = []
             for e in entries_at_param:
                 scene_changes_e = list(itertools.chain.from_iterable(e.matching))
-                total_scene_changes += len(scene_changes_e)
+                #total_scene_changes += len(scene_changes_e)
+                total_scene_changes += scene_changes_e
                 matched_changes_e = [x for x in scene_changes_e if x in match_results[e.risk_id]]
-                scene_changes_matched += len(matched_changes_e)
+                #scene_changes_matched += len(matched_changes_e)
+                scene_changes_matched += matched_changes_e
 
             all_covered = len([x for x in entries_at_param if len(match_results[x.risk_id]) == len(sum(x.matching, []))])
             percentage = all_covered/len(entries_at_param) * 100 
             print('entries covered: '  + str(percentage) + '\%' + ' (' + str(all_covered) + '/' + str(len(entries_at_param))+ ')')
 
-            percentage = scene_changes_matched/total_scene_changes * 100 
-            print('scene changes covered: ' + str(percentage) + '\%' + ' (' + str(scene_changes_matched) + '/' + str(total_scene_changes)+ ')')
+            percentage = len(set(scene_changes_matched))/len(set(total_scene_changes)) * 100 
+            print('scene changes covered: ' + str(percentage) + '\%' + ' (' + str(len(set(scene_changes_matched))) + '/' + str(len(set(total_scene_changes)))+ ')')
         
 
 if __name__ == '__main__':

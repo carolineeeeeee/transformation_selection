@@ -128,3 +128,18 @@
 126,ten_crop,torchvision,Generate ten cropped images from the given image. Crop the given image into four corners and the central crop plus the flipped version of these (horizontal flipping is used by default). ,"{""img"": ""Image to be cropped."", ""size"": "" Desired output size of the crop. If size is an int instead of sequence like (h, w), a square crop (size, size) is made. If provided a sequence of length 1, it will be interpreted as (size[0], size[0])."", ""vertical_flip"": ""Use vertical flipping instead of horizontal""}"
 127,to_grayscale,torchvision,"Convert PIL image of any mode (RGB, HSV, LAB, etc) to grayscale version of image.","{""img"": ""PIL Image to be converted to grayscale"", ""num_output_channels"": ""number of channels of the output image. Value can be 1 or 3. Default is 1.""}"
 128,vflip,torchvision,Vertically flip the given image.,"{""img"": ""Image to be flipped.""}"
+129,Gaussian Noise,CIFAR-10-C,Apply gaussian noise.,{}
+130,Shot Noise,CIFAR-10-C,Apply shot noise.,{}
+131,Impulse Noise,CIFAR-10-C,Apply impulse noise.,{}
+132,Defocus Blur,CIFAR-10-C,Perform defocus blur.,{}
+133,Glass Blur,CIFAR-10-C,Perform glass blur.,{}
+134,Motion Blur,CIFAR-10-C,Perform motion blur.,{}
+135,Zoom Blur,CIFAR-10-C,Perform zoom blur.,{}
+136,Snow,CIFAR-10-C,Add snow effects.,{}
+137,Frost,CIFAR-10-C,Add frost effects.,{}
+138,Fog,CIFAR-10-C,Add fog effects.,{}
+139,Brightness,CIFAR-10-C,Change brightness.,{}
+140,Contrast,CIFAR-10-C,Change contrast.,{}
+141,Elastic,CIFAR-10-C,Apply elastic.,{}
+142,Pixelate,CIFAR-10-C,Apply pixelate.,{}
+143,JPEG,CIFAR-10-C,Perform jpeg compression.,{}

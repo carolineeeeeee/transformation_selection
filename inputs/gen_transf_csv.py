@@ -1199,5 +1199,95 @@ torchvision_vflip.append(json.dumps(torchvision_vflip_parameters))
 Transformations.append(torchvision_vflip)
 
 
+# Gaussian Noise
+cifar_10_c_gaussian_noise = ['Gaussian Noise', 'CIFAR-10-C', 'Apply gaussian noise.']
+cifar_10_c_gaussian_noise_parameters = {}
+cifar_10_c_gaussian_noise.append(json.dumps(cifar_10_c_gaussian_noise_parameters))
+Transformations.append(cifar_10_c_gaussian_noise)
+
+# Shot Noise
+cifar_10_c_shot_noise = ['Shot Noise', 'CIFAR-10-C', 'Apply shot noise.']
+cifar_10_c_shot_noise_parameters = {}
+cifar_10_c_shot_noise.append(json.dumps(cifar_10_c_shot_noise_parameters))
+Transformations.append(cifar_10_c_shot_noise)
+
+# Impulse Noise
+cifar_10_c_impulse_noise = ['Impulse Noise', 'CIFAR-10-C', 'Apply impulse noise.']
+cifar_10_c_impulse_noise_parameters = {}
+cifar_10_c_impulse_noise.append(json.dumps(cifar_10_c_impulse_noise_parameters))
+Transformations.append(cifar_10_c_impulse_noise)
+
+# Defocus Blur
+cifar_10_c_defocus_blur = ['Defocus Blur', 'CIFAR-10-C', 'Perform defocus blur.']
+cifar_10_c_defocus_blur_parameters = {}
+cifar_10_c_defocus_blur.append(json.dumps(cifar_10_c_defocus_blur_parameters))
+Transformations.append(cifar_10_c_defocus_blur)
+
+# Glass Blur
+cifar_10_c_glass_blur = ['Glass Blur', 'CIFAR-10-C', 'Perform glass blur.']
+cifar_10_c_glass_blur_parameters = {}
+cifar_10_c_glass_blur.append(json.dumps(cifar_10_c_glass_blur_parameters))
+Transformations.append(cifar_10_c_glass_blur)
+
+# Motion Blur
+cifar_10_c_motion_blur = ['Motion Blur', 'CIFAR-10-C', 'Perform motion blur.']
+cifar_10_c_motion_blur_parameters = {}
+cifar_10_c_motion_blur.append(json.dumps(cifar_10_c_motion_blur_parameters))
+Transformations.append(cifar_10_c_motion_blur)
+
+# Zoom Blur
+cifar_10_c_zoom_blur = ['Zoom Blur', 'CIFAR-10-C', 'Perform zoom blur.']
+cifar_10_c_zoom_blur_parameters = {}
+cifar_10_c_zoom_blur.append(json.dumps(cifar_10_c_zoom_blur_parameters))
+Transformations.append(cifar_10_c_zoom_blur)
+
+# Snow
+cifar_10_c_snow = ['Snow', 'CIFAR-10-C', 'Add snow effects.']
+cifar_10_c_snow_parameters = {}
+cifar_10_c_snow.append(json.dumps(cifar_10_c_snow_parameters))
+Transformations.append(cifar_10_c_snow)
+
+# Frost
+cifar_10_c_frost = ['Frost', 'CIFAR-10-C', 'Add frost effects.']
+cifar_10_c_frost_parameters = {}
+cifar_10_c_frost.append(json.dumps(cifar_10_c_frost_parameters))
+Transformations.append(cifar_10_c_frost)
+
+# Fog
+cifar_10_c_fog = ['Fog', 'CIFAR-10-C', 'Add fog effects.']
+cifar_10_c_fog_parameters = {}
+cifar_10_c_fog.append(json.dumps(cifar_10_c_fog_parameters))
+Transformations.append(cifar_10_c_fog)
+
+# Brightness
+cifar_10_c_brightness = ['Brightness', 'CIFAR-10-C', 'Change brightness.']
+cifar_10_c_brightness_parameters = {}
+cifar_10_c_brightness.append(json.dumps(cifar_10_c_brightness_parameters))
+Transformations.append(cifar_10_c_brightness)
+
+# Contrast
+cifar_10_c_contrast = ['Contrast', 'CIFAR-10-C', 'Change contrast.']
+cifar_10_c_contrast_parameters = {}
+cifar_10_c_contrast.append(json.dumps(cifar_10_c_contrast_parameters))
+Transformations.append(cifar_10_c_contrast)
+
+# Elastic
+cifar_10_c_elastic = ['Elastic', 'CIFAR-10-C', 'Apply elastic.']
+cifar_10_c_elastic_parameters = {}
+cifar_10_c_elastic.append(json.dumps(cifar_10_c_elastic_parameters))
+Transformations.append(cifar_10_c_elastic)
+
+# Pixelate
+cifar_10_c_pixelate = ['Pixelate', 'CIFAR-10-C', 'Apply pixelate.']
+cifar_10_c_pixelate_parameters = {}
+cifar_10_c_pixelate.append(json.dumps(cifar_10_c_pixelate_parameters))
+Transformations.append(cifar_10_c_pixelate)
+
+# JPEG
+cifar_10_c_jpeg = ['JPEG', 'CIFAR-10-C', 'Perform jpeg compression.']
+cifar_10_c_jpeg_parameters = {}
+cifar_10_c_jpeg.append(json.dumps(cifar_10_c_jpeg_parameters))
+Transformations.append(cifar_10_c_jpeg)
+
 transfs = pd.DataFrame(Transformations, columns=col_names)
 transfs.to_csv('transformations.csv')
