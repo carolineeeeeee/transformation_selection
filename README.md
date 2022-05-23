@@ -42,3 +42,27 @@ We also included saved pickle files for evaluation results in outputs/.
 3. Mapping results by our systematic method and the automation of the systematic method. 
 
 4. Challenges identified by each participant and their feedback on how well our method addressed it. 
+
+
+## Extra RQ2 evaluation results
+We also checked how well the image transformation library [Torchvision](https://pytorch.org/vision/stable/transforms.html) (51 transformations in total) covers the hazardous situations in the CV-HAZOP checklist.
+
+
+| CV-HAZOP Location | situation-coverage | scene-change-coverage|
+| ----------------- | ------------------ | -------------------- |
+| Light Sources     |    0.0% (0/122)    |10.9% (29/266)        |
+| Medium            |    0.0% (0/79)     | 23.2% (44/190)       |
+| Object            |  1.9% (3/162)      |12.0% (37/308)        |
+| Objects           |  0.0% (0/178)      |4.2% (14/334)         |
+| Observer - Optomechanics| 0.0% (0/253) | 13.5% (69/512)       |
+| Observer - Electronics |4.0% (5/125)   | 22.8% (55/241)       |
+
+Coverage metric for different parameters at Observer - Electronics
+
+| CV-HAZOP Parameter | situation-coverage | scene-change-coverage|
+| ----------------- | ------------------ | -------------------- |
+| Exposure and shutter    |   4.2% (1/24)    |14.3% (7/49)        |
+| Resolution (spatial)    |    7.4% (2/27)     | 22.4% (13/58)       |
+| Spectral efficiency    |  4.3% (1/23)     |31.0% (13/42)   |
+| Quality           |  4.8% (1/21)      |23.1% (9/39)       |
+| Quantization/Sampling| 0.0% (0/30 | 24.1% (14/58) |
